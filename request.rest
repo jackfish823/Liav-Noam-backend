@@ -1,0 +1,26 @@
+### Get all posts
+GET http://localhost:3000/post
+
+### Get posts by sender
+GET http://localhost:3000/post?sender=John%20Doe
+
+### Get post by ID
+GET http://localhost:3000/post/post_id
+
+### Create a new post
+POST http://localhost:3000/post
+Content-Type: application/json
+
+{
+  "message": "Hello, world!",
+  "sender": "John Doe"
+}
+
+### Update a post
+PUT http://localhost:3000/post/post_id
+Content-Type: application/json
+
+{
+  "message": "This is an updated message.",
+  "sender": "John Doe"
+}
