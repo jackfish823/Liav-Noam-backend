@@ -3,6 +3,18 @@ import Post from '../models/Post.js';
 
 const router = express.Router();
 
+router.get('/', async (req, res) => {
+    try {
+        const { sender } = req.query;
+        const filter = sender ? { sender } : {};
+        const posts = await Post.find(filter);
+
+        res.status(200).json(posts);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
 router.post('/', async (req, res) => {
     try {
         const {message, sender} = req.body;
