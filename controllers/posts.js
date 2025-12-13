@@ -5,21 +5,25 @@ const router = express.Router();
 
 router.get('/', async (req, res) => {
     try {
-        const {sender} = req.query;
-        const filter = sender ? {sender} : {};
+        const { sender } = req.query;
+        const filter = sender ? { sender } : {};
+        const { sender } = req.query;
+        const filter = sender ? { sender } : {};
         const posts = await Post.find(filter);
 
         res.status(200).json(posts);
     } catch (error) {
         res.status(500).json({message: error.message});
+        res.status(500).json({ message: error.message });
     }
 });
 
 router.post('/', async (req, res) => {
     try {
-        const {message, sender} = req.body;
-        const newPost = new Post({message, sender});
+        const { message, sender } = req.body;
+        const newPost = new Post({ message, sender });
         const savedPost = await newPost.save();
+      
         res.status(201).json(savedPost);
     } catch (error) {
         res.status(409).json({message: error.message});
@@ -31,32 +35,32 @@ router.get('/:id', async (req, res) => {
         const post = await Post.findById(req.params.id);
 
         if (!post) {
-            return res.status(404).json({message: 'Post not found'});
+            return res.status(404).json({ message: 'Post not found' });
         }
 
         res.status(200).json(post);
     } catch (error) {
-        res.status(500).json({message: error.message});
+        res.status(500).json({ message: error.message });
     }
 });
 
 router.put('/:id', async (req, res) => {
     try {
-        const {id} = req.params;
-        const {message, sender} = req.body;
+        const { id } = req.params;
+        const { message, sender } = req.body;
         const updatedPost = await Post.findByIdAndUpdate(
             id,
-            {message, sender},
-            {new: true}
+            { message, sender },
+            { new: true }
         );
 
         if (!updatedPost) {
-            return res.status(404).json({message: 'Post not found'});
+            return res.status(404).json({ message: 'Post not found' });
         }
 
         res.status(200).json(updatedPost);
     } catch (error) {
-        res.status(500).json({message: error.message});
+        res.status(500).json({ message: error.message });
     }
 });
 
