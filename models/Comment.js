@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const Schema = mongoose.Schema;
-const postCommentSchema = new Schema({
+const CommentSchema = new Schema({
     body: {
         type: String,
         required: true,
@@ -16,6 +16,6 @@ const postCommentSchema = new Schema({
     }
 }, {timestamps: true});
 
-const PostComment = mongoose.model('PostComment', postCommentSchema);
+const Comment = mongoose.model('Comment', CommentSchema);
 
-export default PostComment;
+export default Comment;
