@@ -30,3 +30,13 @@ GET http://localhost:3000/comments
 
 ### Get comments by post ID
 GET http://localhost:3000/comments?postId=POST_ID
+
+### Create a new comment
+POST http://localhost:3000/comments
+Content-Type: application/json
+
+{
+  "body": "This is a comment.",
+  "postId": "POST_ID",
+  "author": "Jane Doe"
+}

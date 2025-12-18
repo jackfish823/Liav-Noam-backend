@@ -31,4 +31,22 @@ router.get('/', async (req, res) => {
     }
 });
 
+router.post('/', async (req, res) => {
+    const { body, postId, author } = req.body;
+
+    try {
+        const comment = await PostComments.create({ body, postId, author });
+
+        res.status(201).json(comment);
+    } catch (error) {
+        console.error({
+            message: 'Failed to create comment',
+            error,
+            additionalData: { body, postId, author }
+        });
+
+        res.status(500).json({ message: 'Failed to create comment' });
+    }
+});
+
 export default router;
