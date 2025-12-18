@@ -42,9 +42,12 @@ Content-Type: application/json
 }
 
 ### Update a comment
-PUT http://localhost:3000/comments/COMMENT_ID_HERE
+PUT http://localhost:3000/comments/COMMENT_ID
 Content-Type: application/json
 
 {
   "body": "This is an updated comment."
 }
+
+### Delete a comment
+DELETE http://localhost:3000/comments/COMMENT_ID

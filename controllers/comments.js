@@ -72,4 +72,26 @@ router.put('/:id', async (req, res) => {
     }
 });
 
+router.delete('/:id', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const deletedComment = await PostComments.findByIdAndDelete(id);
+
+        if (!deletedComment) {
+            return res.status(404).json({ message: 'Comment not found' });
+        }
+
+        res.status(200).json(deletedComment);
+    } catch (error) {
+        console.error({
+            message: 'Failed to delete comment',
+            error,
+            additionalData: { id }
+        });
+
+        res.status(500).json({ message: 'Failed to delete comment' });
+    }
+});
+
 export default router;
