@@ -24,3 +24,9 @@ Content-Type: application/json
   "message": "This is an updated message.",
   "sender": "John Doe"
 }
+
+### Get all comments
+GET http://localhost:3000/comments
+
+### Get comments by post ID
+GET http://localhost:3000/comments?postId=POST_ID
