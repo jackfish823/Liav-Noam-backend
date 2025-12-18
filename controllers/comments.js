@@ -49,4 +49,27 @@ router.post('/', async (req, res) => {
     }
 });
 
+router.put('/:id', async (req, res) => {
+    const { id } = req.params;
+    const { body } = req.body;
+
+    try {
+        const updatedComment = await PostComments.findByIdAndUpdate(id, { body }, { new: true });
+
+        if (!updatedComment) {
+            return res.status(404).json({ message: 'Comment not found' });
+        }
+
+        res.status(200).json(updatedComment);
+    } catch (error) {
+        console.error({
+            message: 'Failed to update comment',
+            error,
+            additionalData: { id, body }
+        });
+
+        res.status(500).json({ message: 'Failed to update comment' });
+    }
+});
+
 export default router;
