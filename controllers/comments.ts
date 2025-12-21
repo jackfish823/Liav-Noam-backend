@@ -1,23 +1,26 @@
-import express from 'express';
-import PostComments from '../models/Comment.js';
+import express, { Request, Response } from 'express';
+import { Comment, IComment } from '../models/Comment.js';
+
+type CommentQuery = Record<string, any>;
 
 const router = express.Router();
 
-router.get('/', async (req, res) => {
-    const query = {}
+router.get('/', async (req: Request, res: Response) => {
+    const query: CommentQuery = {};
 
-    const {postId, author} = req.query;
+    const postId = req.query.postId ?? '';
+    const author = req.query.author ?? '';
 
     if (postId) {
-        query['postId'] = postId;
+        query.postId = postId;
     }
 
     if (author) {
-        query['author'] = author;
+        query.author = author;
     }
 
     try {
-        const comments = await PostComments.find(query);
+        const comments = await Comment.find(query);
 
         res.status(200).json(comments);
     } catch (error) {
@@ -27,15 +30,15 @@ router.get('/', async (req, res) => {
             additionalData: { postId, author }
         });
 
-        res.status(500).json({message: 'Failed getting posts comments'});
+        res.status(500).json({ message: 'Failed getting posts comments' });
     }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', async (req: Request, res: Response) => {
     const { body, postId, author } = req.body;
 
     try {
-        const comment = await PostComments.create({ body, postId, author });
+        const comment = await Comment.create({ body, postId, author });
 
         res.status(201).json(comment);
     } catch (error) {
@@ -49,15 +52,16 @@ router.post('/', async (req, res) => {
     }
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', async (req: Request, res: Response) => {
     const { id } = req.params;
     const { body } = req.body;
 
     try {
-        const updatedComment = await PostComments.findByIdAndUpdate(id, { body }, { new: true });
+        const updatedComment = await Comment.findByIdAndUpdate(id, { body }, { new: true });
 
         if (!updatedComment) {
-            return res.status(404).json({ message: 'Comment not found' });
+            res.status(404).json({ message: 'Comment not found' });
+            return;
         }
 
         res.status(200).json(updatedComment);
@@ -72,14 +76,15 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', async (req: Request, res: Response) => {
     const { id } = req.params;
 
     try {
-        const deletedComment = await PostComments.findByIdAndDelete(id);
+        const deletedComment = await Comment.findByIdAndDelete(id);
 
         if (!deletedComment) {
-            return res.status(404).json({ message: 'Comment not found' });
+            res.status(404).json({ message: 'Comment not found' });
+            return;
         }
 
         res.status(200).json(deletedComment);

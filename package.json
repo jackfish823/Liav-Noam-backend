@@ -2,10 +2,12 @@
   "name": "liav-noam-backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
   "type": "module",
   "scripts": {
-    "start": "nodemon index.js",
+    "start": "node dist/index.js",
+    "dev": "nodemon --exec \"node --loader ts-node/esm\" index.ts",
+    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -17,6 +19,11 @@
     "mongoose": "^9.0.1"
   },
   "devDependencies": {
-    "nodemon": "^3.1.11"
+    "@types/express": "^5.0.6",
+    "@types/mongoose": "^5.11.96",
+    "@types/node": "^25.0.3",
+    "nodemon": "^3.1.11",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   }
 }

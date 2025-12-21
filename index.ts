@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Express } from 'express';
 import dotenv from 'dotenv';
 import connectDB from './db-connection.js';
 
@@ -9,10 +9,10 @@ dotenv.config();
 
 void connectDB();
 
-const app = express();
+const app: Express = express();
 const port = process.env.PORT || 3000;
 
-app.use(express.urlencoded({extended: true, limit: '1mb'}));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 app.use(express.json());
 
 app.use('/post', postRoutes);
