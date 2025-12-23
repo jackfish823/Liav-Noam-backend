@@ -31,6 +31,28 @@ router.get('/', async (req, res) => {
     }
 });
 
+router.get('/:id', async (req, res) => {
+    const commentId = req.params.id;
+
+    try {
+        const post = await PostComments.findById(commentId);
+
+        if (!post) {
+            return res.status(404).json({ message: `Comment with id: ${commentId} not found` });
+        }
+
+        res.status(200).json(post);
+    } catch (error) {
+        console.error({
+            message: `Failed getting comment with id: ${commentId}`,
+            error,
+            additionalData: { commentId }
+        });
+
+        res.status(500).json({message: 'Failed getting posts comments'});    }
+});
+
+
 router.post('/', async (req, res) => {
     const { body, postId, author } = req.body;
 
