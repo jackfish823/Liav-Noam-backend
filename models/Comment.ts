@@ -1,6 +1,6 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 
-export interface IComment extends Document {
+export interface IComment {
     body: string;
     postId: mongoose.Types.ObjectId;
     author: string;
@@ -9,7 +9,7 @@ export interface IComment extends Document {
     updatedAt?: Date;
 }
 
-const CommentSchema: Schema = new Schema({
+const CommentSchema = new Schema<IComment>({
     body: {
         type: String,
         required: true,

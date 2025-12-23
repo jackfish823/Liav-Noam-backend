@@ -1,6 +1,6 @@
-import mongoose, {Schema, Document} from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 
-export interface IPost extends Document {
+export interface IPost {
     message: string;
     sender: string;
 
@@ -8,7 +8,7 @@ export interface IPost extends Document {
     updatedAt?: Date;
 }
 
-const postSchema: Schema = new Schema({
+const postSchema = new Schema<IPost>({
     message: {
         type: String,
         required: true,
@@ -17,8 +17,8 @@ const postSchema: Schema = new Schema({
         type: String,
         required: true,
     },
-}, {timestamps: true});
+}, { timestamps: true });
 
 const Post = mongoose.model<IPost>('Post', postSchema);
 
-export {Post}
+export { Post }
