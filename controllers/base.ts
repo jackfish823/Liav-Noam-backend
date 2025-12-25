@@ -27,8 +27,9 @@ class BaseController<T> {
     }
 
     async getAll(req: Request, res: Response) {
+        const filter = req.query;
+
         try {
-            const filter = req.query;
             const list = await this.model.find(filter);
 
             res.status(200).json(list);
@@ -36,6 +37,7 @@ class BaseController<T> {
             console.error({
                 message: `Failed to get all ${this.model.modelName}s from db`,
                 error,
+                additionalData: {filter}
             });
 
             res.status(500).json(`Failed to get all ${this.model.modelName}s`);
@@ -80,7 +82,8 @@ class BaseController<T> {
                 error,
             });
 
-            res.status(500).json(errMsg);        }
+            res.status(500).json(errMsg);
+        }
     }
 
     async delete(req: Request, res: Response) {
@@ -100,7 +103,8 @@ class BaseController<T> {
                 error,
             });
 
-            res.status(500).json(errMsg);        }
+            res.status(500).json(errMsg);
+        }
     }
 }
 
