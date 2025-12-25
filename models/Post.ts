@@ -1,9 +1,8 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Schema, Document } from 'mongoose';
 
-export interface IPost {
+export interface IPost extends Document {
     message: string;
-    sender: string;
-
+    author: mongoose.Types.ObjectId;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -13,12 +12,13 @@ const postSchema = new Schema<IPost>({
         type: String,
         required: true,
     },
-    sender: {
-        type: String,
+    author: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
         required: true,
     },
 }, { timestamps: true });
 
 const Post = mongoose.model<IPost>('Post', postSchema);
 
-export { Post }
+export { Post };

@@ -4,6 +4,7 @@ import connectDB from './db-connection.js';
 
 import postRoutes from './controllers/posts.js';
 import commentsRoutes from './controllers/comments.js';
+import userRoutes from './controllers/users.js';
 
 dotenv.config();
 
@@ -16,7 +17,8 @@ app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 app.use(express.json());
 
 app.use('/post', postRoutes);
-app.use('/comments', commentsRoutes);
+app.use('/comment', commentsRoutes);
+app.use('/user', userRoutes);
 
 app.listen(port, () => {
     console.log(`Server listening at http://localhost:${port}`);
