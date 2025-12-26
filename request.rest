@@ -37,7 +37,7 @@ GET http://localhost:3000/post
 GET http://localhost:3000/post?author=USER_ID
 
 ### Get post by ID
-GET http://localhost:3000/post/POST_ID
+GET http://localhost:3000/post/694e5d377193f8baffa22040
 
 ### Create a new post
 POST http://localhost:3000/post
@@ -45,7 +45,7 @@ Content-Type: application/json
 
 {
   "message": "Hello, world!",
-  "author": "USER_ID"
+  "author": "694e5c3e7193f8baffa2203e"
 }
 
 ### Update a post
@@ -78,8 +78,8 @@ Content-Type: application/json
 
 {
   "body": "This is a comment.",
-  "postId": "POST_ID",
-  "author": "USER_ID"
+  "postId": "694e5d377193f8baffa22040",
+  "author": "694e5c3e7193f8baffa2203e"
 }
 
 ### Update a comment
