@@ -1,8 +1,8 @@
 import express, {Express} from "express";
 import mongoose from "mongoose";
-import postRoute from "./controllers/posts";
-import userRoute from "./controllers/users";
-import commentRoute from "./controllers/comments";
+import postRoute from "./routes/posts";
+import userRoute from "./routes/users";
+import commentRoute from "./routes/comments";
 import dotenv from "dotenv";
 
 dotenv.config({ path: ".env.dev" });

@@ -1,11 +1,9 @@
-import express, {Request, Response} from 'express';
+import {Request, Response} from 'express';
 import Comment from '../models/Comment';
 
 type CommentQuery = Record<string, any>;
 
-const router = express.Router();
-
-router.get('/', async (req: Request, res: Response) => {
+const getComments = async (req: Request, res: Response) => {
     const query: CommentQuery = {};
 
     const postId = req.query.postId ?? '';
@@ -32,9 +30,9 @@ router.get('/', async (req: Request, res: Response) => {
 
         res.status(500).json({message: 'Failed getting posts comments'});
     }
-});
+};
 
-router.get('/:id', async (req: Request, res: Response) => {
+const getCommentById =  async (req: Request, res: Response) => {
     const {id} = req.params;
 
     try {
@@ -55,9 +53,9 @@ router.get('/:id', async (req: Request, res: Response) => {
 
         res.status(500).json({message: 'Failed to get comment'});
     }
-});
+};
 
-router.post('/', async (req: Request, res: Response) => {
+const createComment =  async (req: Request, res: Response) => {
     const {body, postId, author} = req.body;
 
     try {
@@ -73,9 +71,9 @@ router.post('/', async (req: Request, res: Response) => {
 
         res.status(500).json({message: 'Failed to create comment'});
     }
-});
+};
 
-router.put('/:id', async (req: Request, res: Response) => {
+const updateComment = async (req: Request, res: Response) => {
     const {id} = req.params;
     const {body} = req.body;
 
@@ -97,9 +95,9 @@ router.put('/:id', async (req: Request, res: Response) => {
 
         res.status(500).json({message: 'Failed to update comment'});
     }
-});
+};
 
-router.delete('/:id', async (req: Request, res: Response) => {
+const deleteComment =  async (req: Request, res: Response) => {
     const {id} = req.params;
 
     try {
@@ -120,6 +118,12 @@ router.delete('/:id', async (req: Request, res: Response) => {
 
         res.status(500).json({message: 'Failed to delete comment'});
     }
-});
+};
 
-export default router;
+export default {
+    getComments,
+    getCommentById,
+    createComment,
+    updateComment,
+    deleteComment
+};

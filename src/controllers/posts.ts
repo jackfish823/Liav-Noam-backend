@@ -1,9 +1,7 @@
-import express, {Request, Response} from 'express';
+import {Request, Response} from 'express';
 import Post from '../models/Post';
 
-const router = express.Router();
-
-router.get('/', async (req: Request, res: Response) => {
+const getPosts= async (req: Request, res: Response) => {
     try {
         const author = req.query.author as string;
         const filter = author ? {author} : {};
@@ -13,21 +11,20 @@ router.get('/', async (req: Request, res: Response) => {
     } catch (error: any) {
         res.status(500).json({message: error.message});
     }
-});
+};
 
-router.post('/', async (req: Request, res: Response) => {
+const createPost = async (req: Request, res: Response) => {
     try {
         const {message, author} = req.body;
-        const newPost = new Post({message, author});
-        const savedPost = await newPost.save();
+        const savedPost = await Post.create({message, author});
 
         res.status(201).json(savedPost);
     } catch (error: any) {
         res.status(409).json({message: error.message});
     }
-});
+};
 
-router.get('/:id', async (req: Request, res: Response) => {
+const getPostById = async (req: Request, res: Response) => {
     try {
         const post = await Post.findById(req.params.id).populate('author').populate('comments');
 
@@ -40,9 +37,9 @@ router.get('/:id', async (req: Request, res: Response) => {
     } catch (error: any) {
         res.status(500).json({message: error.message});
     }
-});
+};
 
-router.put('/:id', async (req: Request, res: Response) => {
+const updatePost = async (req: Request, res: Response) => {
     try {
         const {id} = req.params;
         const {message, author} = req.body;
@@ -61,9 +58,9 @@ router.put('/:id', async (req: Request, res: Response) => {
     } catch (error: any) {
         res.status(500).json({message: error.message});
     }
-});
+};
 
-router.delete('/:id', async (req: Request, res: Response) => {
+const deletePost = async (req: Request, res: Response) => {
     try {
         const {id} = req.params;
         const deletedPost = await Post.findByIdAndDelete(id);
@@ -77,6 +74,12 @@ router.delete('/:id', async (req: Request, res: Response) => {
     } catch (error: any) {
         res.status(500).json({message: error.message});
     }
-});
+};
 
-export default router;
+export default {
+    getPosts,
+    createPost,
+    getPostById,
+    updatePost,
+    deletePost
+};
