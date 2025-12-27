@@ -30,6 +30,4 @@ postSchema.virtual('comments', {
     foreignField: 'postId'
 });
 
-const Post = mongoose.model<IPost>('Post', postSchema);
-
-export { Post };
+export default mongoose.model<IPost>('Post', postSchema);

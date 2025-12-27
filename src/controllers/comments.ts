@@ -1,5 +1,5 @@
 import express, {Request, Response} from 'express';
-import {Comment} from '../models/Comment.js';
+import Comment from '../models/Comment';
 
 type CommentQuery = Record<string, any>;
 
@@ -27,21 +27,21 @@ router.get('/', async (req: Request, res: Response) => {
         console.error({
             message: 'Filed getting posts comments',
             error,
-            additionalData: { postId, author }
+            additionalData: {postId, author}
         });
 
-        res.status(500).json({ message: 'Failed getting posts comments' });
+        res.status(500).json({message: 'Failed getting posts comments'});
     }
 });
 
 router.get('/:id', async (req: Request, res: Response) => {
-    const { id } = req.params;
+    const {id} = req.params;
 
     try {
         const comment = await Comment.findById(id).populate('author');
 
         if (!comment) {
-            res.status(404).json({ message: 'Comment not found' });
+            res.status(404).json({message: 'Comment not found'});
             return;
         }
 
@@ -50,40 +50,40 @@ router.get('/:id', async (req: Request, res: Response) => {
         console.error({
             message: 'Failed to get comment',
             error,
-            additionalData: { id }
+            additionalData: {id}
         });
 
-        res.status(500).json({ message: 'Failed to get comment' });
+        res.status(500).json({message: 'Failed to get comment'});
     }
 });
 
 router.post('/', async (req: Request, res: Response) => {
-    const { body, postId, author } = req.body;
+    const {body, postId, author} = req.body;
 
     try {
-        const comment = await Comment.create({ body, postId, author });
+        const comment = await Comment.create({body, postId, author});
 
         res.status(201).json(comment);
     } catch (error) {
         console.error({
             message: 'Failed to create comment',
             error,
-            additionalData: { body, postId, author }
+            additionalData: {body, postId, author}
         });
 
-        res.status(500).json({ message: 'Failed to create comment' });
+        res.status(500).json({message: 'Failed to create comment'});
     }
 });
 
 router.put('/:id', async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const { body } = req.body;
+    const {id} = req.params;
+    const {body} = req.body;
 
     try {
-        const updatedComment = await Comment.findByIdAndUpdate(id, { body }, { new: true });
+        const updatedComment = await Comment.findByIdAndUpdate(id, {body}, {new: true});
 
         if (!updatedComment) {
-            res.status(404).json({ message: 'Comment not found' });
+            res.status(404).json({message: 'Comment not found'});
             return;
         }
 
@@ -92,21 +92,21 @@ router.put('/:id', async (req: Request, res: Response) => {
         console.error({
             message: 'Failed to update comment',
             error,
-            additionalData: { id, body }
+            additionalData: {id, body}
         });
 
-        res.status(500).json({ message: 'Failed to update comment' });
+        res.status(500).json({message: 'Failed to update comment'});
     }
 });
 
 router.delete('/:id', async (req: Request, res: Response) => {
-    const { id } = req.params;
+    const {id} = req.params;
 
     try {
         const deletedComment = await Comment.findByIdAndDelete(id);
 
         if (!deletedComment) {
-            res.status(404).json({ message: 'Comment not found' });
+            res.status(404).json({message: 'Comment not found'});
             return;
         }
 
@@ -115,10 +115,10 @@ router.delete('/:id', async (req: Request, res: Response) => {
         console.error({
             message: 'Failed to delete comment',
             error,
-            additionalData: { id }
+            additionalData: {id}
         });
 
-        res.status(500).json({ message: 'Failed to delete comment' });
+        res.status(500).json({message: 'Failed to delete comment'});
     }
 });
 
