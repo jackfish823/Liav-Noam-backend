@@ -14,7 +14,7 @@ app.use("/user", userRoute);
 app.use("/comment", commentRoute);
 
 const initApp = () => {
-    const pr = new Promise<Express>((resolve, reject) => {
+    return new Promise<Express>((resolve, reject) => {
         const dbUrl = process.env.DATABASE_URL;
         if (!dbUrl) {
             reject("DATABASE_URL is not defined");
@@ -29,7 +29,6 @@ const initApp = () => {
         db.on("error", (error) => console.error(error));
         db.once("open", () => console.log("Connected to Database"));
     });
-    return pr;
 };
 
 export default initApp;
