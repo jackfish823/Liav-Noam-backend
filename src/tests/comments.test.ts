@@ -10,6 +10,7 @@ let app: Express;
 let userId: string;
 let postId: string;
 let commentId: string;
+let accessToken: string;
 
 beforeAll(async () => {
   app = await initApp();
@@ -17,7 +18,6 @@ beforeAll(async () => {
   await Post.deleteMany();
   await Comment.deleteMany();
 
-  // Create User
   const userResponse = await request(app).post('/user').send({
     username: 'commentuser',
     email: 'comment@test.com',
@@ -25,11 +25,19 @@ beforeAll(async () => {
   });
   userId = userResponse.body._id;
 
-  // Create Post
-  const postResponse = await request(app).post('/post').send({
-    message: 'Post for comments',
-    author: userId,
+  const loginResponse = await request(app).post('/auth/login').send({
+      email: 'comment@test.com',
+      password: 'commentpassword'
   });
+  accessToken = loginResponse.body.token;
+
+  // Create Post
+  const postResponse = await request(app).post('/post')
+    .set('Authorization', 'Bearer ' + accessToken)
+    .send({
+      message: 'Post for comments',
+      author: userId,
+    });
   postId = postResponse.body._id;
 });
 
@@ -45,11 +53,13 @@ describe('Comments API', () => {
   });
 
   test('POST /comment should create a new comment', async () => {
-    const response = await request(app).post('/comment').send({
-      body: 'Test Comment',
-      postId: postId,
-      author: userId,
-    });
+    const response = await request(app).post('/comment')
+      .set('Authorization', 'Bearer ' + accessToken)
+      .send({
+        body: 'Test Comment',
+        postId: postId,
+        author: userId,
+      });
     expect(response.status).toBe(201);
     expect(response.body.body).toBe('Test Comment');
     expect(response.body.postId).toBe(postId);
@@ -58,10 +68,12 @@ describe('Comments API', () => {
   });
 
   test('POST /comment should return 500 for missing required fields', async () => {
-    const response = await request(app).post('/comment').send({
-      body: 'Test Comment',
-      // Missing postId and author
-    });
+    const response = await request(app).post('/comment')
+      .set('Authorization', 'Bearer ' + accessToken)
+      .send({
+        body: 'Test Comment',
+        // Missing postId and author
+      });
     expect(response.status).toBe(500);
   });
 
@@ -100,41 +112,50 @@ describe('Comments API', () => {
   });
 
   test('PUT /comment/:id should update a comment', async () => {
-    const response = await request(app).put(`/comment/${commentId}`).send({
-      body: 'Updated Comment',
-    });
+    const response = await request(app).put(`/comment/${commentId}`)
+      .set('Authorization', 'Bearer ' + accessToken)
+      .send({
+        body: 'Updated Comment',
+      });
     expect(response.status).toBe(200);
     expect(response.body.body).toBe('Updated Comment');
   });
 
   test('PUT /comment/:id should return 404 for non-existent id', async () => {
     const fakeId = new mongoose.Types.ObjectId();
-    const response = await request(app).put(`/comment/${fakeId}`).send({
-      body: 'Updated Comment',
-    });
+    const response = await request(app).put(`/comment/${fakeId}`)
+      .set('Authorization', 'Bearer ' + accessToken)
+      .send({
+        body: 'Updated Comment',
+      });
     expect(response.status).toBe(404);
   });
 
   test('PUT /comment/:id should return 500 for invalid id format', async () => {
-    const response = await request(app).put(`/comment/invalid-id`).send({
-      body: 'Updated Comment',
-    });
+    const response = await request(app).put(`/comment/invalid-id`)
+      .set('Authorization', 'Bearer ' + accessToken)
+      .send({
+        body: 'Updated Comment',
+      });
     expect(response.status).toBe(500);
   });
 
   test('DELETE /comment/:id should delete a comment', async () => {
-    const response = await request(app).delete(`/comment/${commentId}`);
+    const response = await request(app).delete(`/comment/${commentId}`)
+      .set('Authorization', 'Bearer ' + accessToken);
     expect(response.status).toBe(200);
   });
 
   test('DELETE /comment/:id should return 404 for non-existent id', async () => {
     const fakeId = new mongoose.Types.ObjectId();
-    const response = await request(app).delete(`/comment/${fakeId}`);
+    const response = await request(app).delete(`/comment/${fakeId}`)
+      .set('Authorization', 'Bearer ' + accessToken);
     expect(response.status).toBe(404);
   });
 
   test('DELETE /comment/:id should return 500 for invalid id format', async () => {
-    const response = await request(app).delete(`/comment/invalid-id`);
+    const response = await request(app).delete(`/comment/invalid-id`)
+      .set('Authorization', 'Bearer ' + accessToken);
     expect(response.status).toBe(500);
   });
 
