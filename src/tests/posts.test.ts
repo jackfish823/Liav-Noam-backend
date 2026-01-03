@@ -17,7 +17,9 @@ beforeAll(async () => {
     const userResponse = await request(app).post('/user').send({
         username: 'testuser',
         email: 'test@test.com',
+        password: 'test123'
     });
+
     userId = userResponse.body._id;
 });
 

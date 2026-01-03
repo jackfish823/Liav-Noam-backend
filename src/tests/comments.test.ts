@@ -21,6 +21,7 @@ beforeAll(async () => {
   const userResponse = await request(app).post('/user').send({
     username: 'commentuser',
     email: 'comment@test.com',
+    password: 'commentpassword'
   });
   userId = userResponse.body._id;
 

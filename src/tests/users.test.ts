@@ -27,6 +27,7 @@ describe('Users API', () => {
         const response = await request(app).post('/user').send({
             username: 'testuser',
             email: 'test@test.com',
+            password: 'password'
         });
         expect(response.status).toBe(201);
         expect(response.body.username).toBe('testuser');
@@ -38,16 +39,17 @@ describe('Users API', () => {
         const response = await request(app).post('/user').send({
             username: 'testuser2',
             email: 'test@test.com', // Duplicate email
+            password: 'password'
         });
         expect(response.status).toBe(409);
     });
 
-    test('POST /user should return 500 for missing required fields', async () => {
+    test('POST /user should return 400 for missing required fields (email)', async () => {
         const response = await request(app).post('/user').send({
             username: 'testuser3',
             // Missing email
         });
-        expect(response.status).toBe(409);
+        expect(response.status).toBe(400);
     });
 
     test('GET /user should return all users', async () => {
