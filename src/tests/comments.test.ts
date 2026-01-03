@@ -12,22 +12,26 @@ let postId: string;
 let commentId: string;
 let accessToken: string;
 
+const testUser = {
+    username: 'commentuser',
+    email: 'comment@test.com',
+    password: 'commentpassword'
+};
+
 beforeAll(async () => {
   app = await initApp();
   await User.deleteMany();
   await Post.deleteMany();
   await Comment.deleteMany();
 
-  const userResponse = await request(app).post('/user').send({
-    username: 'commentuser',
-    email: 'comment@test.com',
-    password: 'commentpassword'
-  });
+  // Create User
+  const userResponse = await request(app).post('/user').send(testUser);
   userId = userResponse.body._id;
 
+  // Login to get access token
   const loginResponse = await request(app).post('/auth/login').send({
-      email: 'comment@test.com',
-      password: 'commentpassword'
+      email: testUser.email,
+      password: testUser.password
   });
   accessToken = loginResponse.body.token;
 

@@ -10,22 +10,26 @@ let userId: string;
 let postId: string;
 let accessToken: string;
 
+const testUser = {
+    username: 'testuser',
+    email: 'test@test.com',
+    password: 'test123'
+};
+
 beforeAll(async () => {
     app = await initApp();
     await User.deleteMany();
     await Post.deleteMany();
 
-    const userResponse = await request(app).post('/user').send({
-        username: 'testuser',
-        email: 'test@test.com',
-        password: 'test123'
-    });
+    // Register user
+    const userResponse = await request(app).post('/user').send(testUser);
 
     userId = userResponse.body._id;
 
+    // Login to get access token
     const loginResponse = await request(app).post('/auth/login').send({
-        email: 'test@test.com',
-        password: 'test123'
+        email: testUser.email,
+        password: testUser.password
     });
     accessToken = loginResponse.body.token;
 });

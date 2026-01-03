@@ -44,11 +44,7 @@ const login = async (req: Request, res: Response) => {
     }
 };
 
-const validateUserRefreshToken = async (refreshToken: string | undefined): Promise<IUser> => {
-    if (!refreshToken) {
-        throw new Error("Refresh token is required");
-    }
-
+const validateUserRefreshToken = async (refreshToken: string): Promise<IUser> => {
     const decoded = verifyToken(refreshToken);
     const user = await User.findById(decoded._id);
 
@@ -69,6 +65,11 @@ const validateUserRefreshToken = async (refreshToken: string | undefined): Promi
 const logout = async (req: Request, res: Response) => {
     const {refreshToken} = req.body;
 
+    if (!refreshToken) {
+        res.status(400).json({message: "Refresh token is required"});
+        return;
+    }
+
     try {
         const user = await validateUserRefreshToken(refreshToken);
 
@@ -85,6 +86,11 @@ const logout = async (req: Request, res: Response) => {
 const refresh = async (req: Request, res: Response) => {
     const {refreshToken} = req.body;
 
+    if (!refreshToken) {
+        res.status(400).json({message: "Refresh token is required"});
+        return;
+    }
+
     try {
         const user = await validateUserRefreshToken(refreshToken);
 
@@ -100,7 +106,7 @@ const refresh = async (req: Request, res: Response) => {
             _id: user._id
         });
     } catch (error: any) {
-        res.status(403).json({message: error.message});
+        res.status(403).json({message: error.message || "Invalid request"});
     }
 };
 
