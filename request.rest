@@ -6,7 +6,8 @@ Content-Type: application/json
 
 {
   "username": "johndoe",
-  "email": "john@example.com"
+  "email": "john@example.com",
+  "password": "password123"
 }
 
 ### Get all users
@@ -21,7 +22,8 @@ Content-Type: application/json
 
 {
   "username": "johndoe_updated",
-  "email": "john_updated@example.com"
+  "email": "john_updated@example.com",
+  "password": "newpassword456"
 }
 
 ### Delete a user

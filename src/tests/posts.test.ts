@@ -8,17 +8,30 @@ import Post from '../models/Post';
 let app: Express;
 let userId: string;
 let postId: string;
+let accessToken: string;
+
+const testUser = {
+    username: 'testuser',
+    email: 'test@test.com',
+    password: 'test123'
+};
 
 beforeAll(async () => {
     app = await initApp();
     await User.deleteMany();
     await Post.deleteMany();
 
-    const userResponse = await request(app).post('/user').send({
-        username: 'testuser',
-        email: 'test@test.com',
-    });
+    // Register user
+    const userResponse = await request(app).post('/user').send(testUser);
+
     userId = userResponse.body._id;
+
+    // Login to get access token
+    const loginResponse = await request(app).post('/auth/login').send({
+        email: testUser.email,
+        password: testUser.password
+    });
+    accessToken = loginResponse.body.token;
 });
 
 afterAll(async () => {
@@ -33,10 +46,12 @@ describe('Posts API', () => {
     });
 
     test('POST /post should create a new post', async () => {
-        const response = await request(app).post('/post').send({
-            message: 'Test Message',
-            author: userId,
-        });
+        const response = await request(app).post('/post')
+            .set('Authorization', 'Bearer ' + accessToken)
+            .send({
+                message: 'Test Message',
+                author: userId,
+            });
         expect(response.status).toBe(201);
         expect(response.body.message).toBe('Test Message');
         expect(response.body.author).toBe(userId);
@@ -44,10 +59,12 @@ describe('Posts API', () => {
     });
 
     test('POST /post should fail with missing fields', async () => {
-        const response = await request(app).post('/post').send({
-            message: 'Test Message',
-            // Missing author
-        });
+        const response = await request(app).post('/post')
+            .set('Authorization', 'Bearer ' + accessToken)
+            .send({
+                message: 'Test Message',
+                // Missing author
+            });
         expect(response.status).toBe(409);
     });
 
@@ -81,31 +98,37 @@ describe('Posts API', () => {
     });
 
     test('PUT /post/:id should update a post', async () => {
-        const response = await request(app).put(`/post/${postId}`).send({
-            message: 'Updated Message',
-            author: userId,
-        });
+        const response = await request(app).put(`/post/${postId}`)
+            .set('Authorization', 'Bearer ' + accessToken)
+            .send({
+                message: 'Updated Message',
+                author: userId,
+            });
         expect(response.status).toBe(200);
         expect(response.body.message).toBe('Updated Message');
     });
 
     test('PUT /post/:id should return 404 for non-existent id', async () => {
         const fakeId = new mongoose.Types.ObjectId();
-        const response = await request(app).put(`/post/${fakeId}`).send({
-            message: 'Updated Message',
-            author: userId,
-        });
+        const response = await request(app).put(`/post/${fakeId}`)
+            .set('Authorization', 'Bearer ' + accessToken)
+            .send({
+                message: 'Updated Message',
+                author: userId,
+            });
         expect(response.status).toBe(404);
     });
 
     test('DELETE /post/:id should delete a post', async () => {
-        const response = await request(app).delete(`/post/${postId}`);
+        const response = await request(app).delete(`/post/${postId}`)
+            .set('Authorization', 'Bearer ' + accessToken);
         expect(response.status).toBe(200);
     });
 
     test('DELETE /post/:id should return 404 for non-existent id', async () => {
         const fakeId = new mongoose.Types.ObjectId();
-        const response = await request(app).delete(`/post/${fakeId}`);
+        const response = await request(app).delete(`/post/${fakeId}`)
+            .set('Authorization', 'Bearer ' + accessToken);
         expect(response.status).toBe(404);
     });
 
