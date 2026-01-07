@@ -50,7 +50,6 @@ describe('Posts API', () => {
             .set('Authorization', 'Bearer ' + accessToken)
             .send({
                 message: 'Test Message',
-                author: userId,
             });
         expect(response.status).toBe(201);
         expect(response.body.message).toBe('Test Message');
@@ -61,10 +60,7 @@ describe('Posts API', () => {
     test('POST /post should fail with missing fields', async () => {
         const response = await request(app).post('/post')
             .set('Authorization', 'Bearer ' + accessToken)
-            .send({
-                message: 'Test Message',
-                // Missing author
-            });
+            .send({});
         expect(response.status).toBe(409);
     });
 
@@ -102,7 +98,6 @@ describe('Posts API', () => {
             .set('Authorization', 'Bearer ' + accessToken)
             .send({
                 message: 'Updated Message',
-                author: userId,
             });
         expect(response.status).toBe(200);
         expect(response.body.message).toBe('Updated Message');
@@ -114,7 +109,6 @@ describe('Posts API', () => {
             .set('Authorization', 'Bearer ' + accessToken)
             .send({
                 message: 'Updated Message',
-                author: userId,
             });
         expect(response.status).toBe(404);
     });

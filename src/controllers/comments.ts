@@ -1,5 +1,6 @@
 import {Request, Response} from 'express';
 import Comment from '../models/Comment';
+import { AuthRequest } from '../middleware/auth';
 
 type CommentQuery = Record<string, any>;
 
@@ -55,8 +56,14 @@ const getCommentById =  async (req: Request, res: Response) => {
     }
 };
 
-const createComment =  async (req: Request, res: Response) => {
-    const {body, postId, author} = req.body;
+const createComment =  async (req: AuthRequest, res: Response) => {
+    const {body, postId} = req.body;
+    const author = req.user._id;
+
+    if (!body || !postId) {
+        res.status(400).json({message: 'Comment body and postId are required'});
+        return;
+    }
 
     try {
         const comment = await Comment.create({body, postId, author});
@@ -76,6 +83,11 @@ const createComment =  async (req: Request, res: Response) => {
 const updateComment = async (req: Request, res: Response) => {
     const {id} = req.params;
     const {body} = req.body;
+
+    if (!body) {
+        res.status(400).json({message: 'Comment body is required'});
+        return;
+    }
 
     try {
         const updatedComment = await Comment.findByIdAndUpdate(id, {body}, {new: true});

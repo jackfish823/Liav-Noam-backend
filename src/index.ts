@@ -5,11 +5,15 @@ import userRoute from "./routes/users";
 import commentRoute from "./routes/comments";
 import authRoute from "./routes/auth";
 import dotenv from "dotenv";
+import { swaggerSetup } from "./swagger";
 
 dotenv.config({ path: ".env.dev" });
 
 const app = express();
 app.use(express.json());
+
+swaggerSetup(app);
+
 app.use("/auth", authRoute);
 app.use("/post", postRoute);
 app.use("/user", userRoute);

@@ -56,20 +56,20 @@ describe('Auth API', () => {
             expect(response.status).toBe(400);
         });
 
-        test('should fail with 400 if user does not exist', async () => {
+        test('should fail with 401 if user does not exist', async () => {
             const response = await request(app).post('/auth/login').send({
                 email: 'wrong@email.com',
                 password: 'somepassword'
             });
-            expect(response.status).toBe(400);
+            expect(response.status).toBe(401);
         });
 
-        test('should fail with 400 if password is incorrect', async () => {
+        test('should fail with 401 if password is incorrect', async () => {
             const response = await request(app).post('/auth/login').send({
                 email: testUser.email,
                 password: 'wrongpassword'
             });
-            expect(response.status).toBe(400);
+            expect(response.status).toBe(401);
         });
     });
 
