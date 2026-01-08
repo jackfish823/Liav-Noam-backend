@@ -1,5 +1,6 @@
 import {Request, Response} from 'express';
 import Post from '../models/Post';
+import { AuthRequest } from '../middleware/auth';
 
 const getPosts= async (req: Request, res: Response) => {
     try {
@@ -13,9 +14,11 @@ const getPosts= async (req: Request, res: Response) => {
     }
 };
 
-const createPost = async (req: Request, res: Response) => {
+const createPost = async (req: AuthRequest, res: Response) => {
     try {
-        const {message, author} = req.body;
+        const {message} = req.body;
+        const author = req.user._id;
+        
         const savedPost = await Post.create({message, author});
 
         res.status(201).json(savedPost);
@@ -42,10 +45,11 @@ const getPostById = async (req: Request, res: Response) => {
 const updatePost = async (req: Request, res: Response) => {
     try {
         const {id} = req.params;
-        const {message, author} = req.body;
+        const {message} = req.body;
+        
         const updatedPost = await Post.findByIdAndUpdate(
             id,
-            {message, author},
+            {message},
             {new: true}
         );
 

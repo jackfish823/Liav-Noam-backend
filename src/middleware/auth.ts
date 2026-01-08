@@ -24,10 +24,9 @@ const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => 
 
     try {
         req.user = verifyToken(token);
-
         next();
     } catch (err) {
-        res.status(401).json({message: 'Invalid or expired authorization token'});
+        res.status(403).json({message: 'Invalid or expired token'});
     }
 };
 

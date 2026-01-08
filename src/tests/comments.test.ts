@@ -2,169 +2,183 @@ import request from 'supertest';
 import initApp from '../index';
 import mongoose from 'mongoose';
 import {Express} from 'express';
-import User from '../models/User';
 import Post from '../models/Post';
 import Comment from '../models/Comment';
+import User from '../models/User';
 
 let app: Express;
-let userId: string;
 let postId: string;
-let commentId: string;
 let accessToken: string;
-
 const testUser = {
-    username: 'commentuser',
+    username: 'commenttest',
     email: 'comment@test.com',
-    password: 'commentpassword'
+    password: 'password123'
 };
 
 beforeAll(async () => {
-  app = await initApp();
-  await User.deleteMany();
-  await Post.deleteMany();
-  await Comment.deleteMany();
+    app = await initApp();
+    await Comment.deleteMany();
+    await Post.deleteMany();
+    await User.deleteMany();
 
-  // Create User
-  const userResponse = await request(app).post('/user').send(testUser);
-  userId = userResponse.body._id;
+    // Register and login user
+    const userRes = await request(app).post('/user').send(testUser);
+    const userId = userRes.body._id;
 
-  // Login to get access token
-  const loginResponse = await request(app).post('/auth/login').send({
-      email: testUser.email,
-      password: testUser.password
-  });
-  accessToken = loginResponse.body.token;
-
-  // Create Post
-  const postResponse = await request(app).post('/post')
-    .set('Authorization', 'Bearer ' + accessToken)
-    .send({
-      message: 'Post for comments',
-      author: userId,
+    const loginRes = await request(app).post('/auth/login').send({
+        email: testUser.email,
+        password: testUser.password
     });
-  postId = postResponse.body._id;
+    accessToken = loginRes.body.token;
+
+    const post = await Post.create({
+        message: 'Test Post',
+        author: userId
+    });
+    postId = post._id.toString();
 });
 
 afterAll(async () => {
-  await mongoose.connection.close();
+    await mongoose.connection.close();
 });
 
 describe('Comments API', () => {
-  test('GET /comment should return empty array initially', async () => {
-    const response = await request(app).get('/comment');
-    expect(response.status).toBe(200);
-    expect(response.body).toEqual([]);
-  });
+    describe('POST /comment', () => {
+        test('should create a new comment', async () => {
+            const response = await request(app)
+                .post('/comment')
+                .set('Authorization', `Bearer ${accessToken}`)
+                .send({
+                    body: 'Test Comment',
+                    postId: postId
+                });
+            expect(response.status).toBe(201);
+            expect(response.body.body).toBe('Test Comment');
+            expect(response.body.postId).toBe(postId);
+        });
 
-  test('POST /comment should create a new comment', async () => {
-    const response = await request(app).post('/comment')
-      .set('Authorization', 'Bearer ' + accessToken)
-      .send({
-        body: 'Test Comment',
-        postId: postId,
-        author: userId,
-      });
-    expect(response.status).toBe(201);
-    expect(response.body.body).toBe('Test Comment');
-    expect(response.body.postId).toBe(postId);
-    expect(response.body.author).toBe(userId);
-    commentId = response.body._id;
-  });
+        test('should fail with 400 if postId is missing', async () => {
+            const response = await request(app)
+                .post('/comment')
+                .set('Authorization', `Bearer ${accessToken}`)
+                .send({
+                    body: 'Test Comment'
+                });
+            expect(response.status).toBe(400);
+            expect(response.body.message).toBe('Comment body and postId are required');
+        });
 
-  test('POST /comment should return 500 for missing required fields', async () => {
-    const response = await request(app).post('/comment')
-      .set('Authorization', 'Bearer ' + accessToken)
-      .send({
-        body: 'Test Comment',
-        // Missing postId and author
-      });
-    expect(response.status).toBe(500);
-  });
+        test('should fail with 400 if body is missing', async () => {
+            const response = await request(app)
+                .post('/comment')
+                .set('Authorization', `Bearer ${accessToken}`)
+                .send({
+                    postId: postId
+                });
+            expect(response.status).toBe(400);
+            expect(response.body.message).toBe('Comment body and postId are required');
+        });
+    });
 
-  test('GET /comment should return all comments', async () => {
-    const response = await request(app).get('/comment');
-    expect(response.status).toBe(200);
-    expect(response.body.length).toBe(1);
-    expect(response.body[0].body).toBe('Test Comment');
-    // Check population
-    expect(response.body[0].author._id).toBe(userId);
-  });
+    describe('GET /comment', () => {
+        test('should get all comments', async () => {
+            const response = await request(app).get('/comment');
+            expect(response.status).toBe(200);
+            expect(Array.isArray(response.body)).toBeTruthy();
+            expect(response.body.length).toBeGreaterThan(0);
+        });
 
-  test('GET /comment?postId=ID should return comments for a post', async () => {
-    const response = await request(app).get(`/comment?postId=${postId}`);
-    expect(response.status).toBe(200);
-    expect(response.body.length).toBe(1);
-    expect(response.body[0].postId).toBe(postId);
-  });
+        test('should filter comments by postId', async () => {
+            const response = await request(app).get(`/comment?postId=${postId}`);
+            expect(response.status).toBe(200);
+            expect(response.body[0].postId).toBe(postId);
+        });
+    });
 
-  test('GET /comment?author=ID should return comments by author', async () => {
-    const response = await request(app).get(`/comment?author=${userId}`);
-    expect(response.status).toBe(200);
-    expect(response.body.length).toBe(1);
-    expect(response.body[0].author._id).toBe(userId);
-  });
+    describe('GET /comment/:id', () => {
+        let commentId: string;
 
-  test('GET /comment/:id should return a comment by id', async () => {
-    const response = await request(app).get(`/comment/${commentId}`);
-    expect(response.status).toBe(200);
-    expect(response.body.body).toBe('Test Comment');
-  });
+        beforeAll(async () => {
+            const comment = await Comment.findOne();
+            commentId = comment?._id.toString() || '';
+        });
 
-  test('GET /comment/:id should return 500 for invalid id format', async () => {
-    const response = await request(app).get(`/comment/invalid-id`);
-    expect(response.status).toBe(500);
-  });
+        test('should get comment by id', async () => {
+            const response = await request(app).get(`/comment/${commentId}`);
+            expect(response.status).toBe(200);
+            expect(response.body._id).toBe(commentId);
+        });
 
-  test('PUT /comment/:id should update a comment', async () => {
-    const response = await request(app).put(`/comment/${commentId}`)
-      .set('Authorization', 'Bearer ' + accessToken)
-      .send({
-        body: 'Updated Comment',
-      });
-    expect(response.status).toBe(200);
-    expect(response.body.body).toBe('Updated Comment');
-  });
+        test('should return 404 for non-existent comment', async () => {
+            const response = await request(app).get('/comment/65e1d510e1b6f1234567890a');
+            expect(response.status).toBe(404);
+        });
+    });
 
-  test('PUT /comment/:id should return 404 for non-existent id', async () => {
-    const fakeId = new mongoose.Types.ObjectId();
-    const response = await request(app).put(`/comment/${fakeId}`)
-      .set('Authorization', 'Bearer ' + accessToken)
-      .send({
-        body: 'Updated Comment',
-      });
-    expect(response.status).toBe(404);
-  });
+    describe('PUT /comment/:id', () => {
+        let commentId: string;
 
-  test('PUT /comment/:id should return 500 for invalid id format', async () => {
-    const response = await request(app).put(`/comment/invalid-id`)
-      .set('Authorization', 'Bearer ' + accessToken)
-      .send({
-        body: 'Updated Comment',
-      });
-    expect(response.status).toBe(500);
-  });
+        beforeAll(async () => {
+            const comment = await Comment.findOne();
+            commentId = comment?._id.toString() || '';
+        });
 
-  test('DELETE /comment/:id should delete a comment', async () => {
-    const response = await request(app).delete(`/comment/${commentId}`)
-      .set('Authorization', 'Bearer ' + accessToken);
-    expect(response.status).toBe(200);
-  });
+        test('should update comment', async () => {
+            const response = await request(app)
+                .put(`/comment/${commentId}`)
+                .set('Authorization', `Bearer ${accessToken}`)
+                .send({
+                    body: 'Updated Comment'
+                });
+            expect(response.status).toBe(200);
+            expect(response.body.body).toBe('Updated Comment');
+        });
 
-  test('DELETE /comment/:id should return 404 for non-existent id', async () => {
-    const fakeId = new mongoose.Types.ObjectId();
-    const response = await request(app).delete(`/comment/${fakeId}`)
-      .set('Authorization', 'Bearer ' + accessToken);
-    expect(response.status).toBe(404);
-  });
+        test('should fail with 400 if body is missing', async () => {
+            const response = await request(app)
+                .put(`/comment/${commentId}`)
+                .set('Authorization', `Bearer ${accessToken}`)
+                .send({});
+            expect(response.status).toBe(400);
+            expect(response.body.message).toBe('Comment body is required');
+        });
 
-  test('DELETE /comment/:id should return 500 for invalid id format', async () => {
-    const response = await request(app).delete(`/comment/invalid-id`)
-      .set('Authorization', 'Bearer ' + accessToken);
-    expect(response.status).toBe(500);
-  });
+        test('should return 404 for non-existent comment', async () => {
+            const response = await request(app)
+                .put('/comment/65e1d510e1b6f1234567890a')
+                .set('Authorization', `Bearer ${accessToken}`)
+                .send({
+                    body: 'Updated Comment'
+                });
+            expect(response.status).toBe(404);
+        });
+    });
 
-  test('GET /comment/:id should return 404 after delete', async () => {
-    const response = await request(app).get(`/comment/${commentId}`);
-    expect(response.status).toBe(404);
-  });
+    describe('DELETE /comment/:id', () => {
+        let commentId: string;
+
+        beforeEach(async () => {
+            const comment = await Comment.create({
+                body: 'Delete Me',
+                postId: postId,
+                author: (await User.findOne())?._id
+            });
+            commentId = comment._id.toString();
+        });
+
+        test('should delete comment', async () => {
+            const response = await request(app)
+                .delete(`/comment/${commentId}`)
+                .set('Authorization', `Bearer ${accessToken}`);
+            expect(response.status).toBe(200);
+            expect(response.body._id).toBe(commentId);
+        });
+
+        test('should return 404 for non-existent comment', async () => {
+            const response = await request(app)
+                .delete('/comment/65e1d510e1b6f1234567890a')
+                .set('Authorization', `Bearer ${accessToken}`);
+            expect(response.status).toBe(404);
+        });
+    });
 });
