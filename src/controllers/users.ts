@@ -4,7 +4,7 @@ import User from '../models/User';
 import {createAuthTokens} from '../utils/jwt';
 
 const createUser = async (req: Request, res: Response) => {
-    const {username, email, password} = req.body;
+    const {username, email, password, imgUrl} = req.body;
 
     if (!username || !password || !email) {
         res.status(400).json({message: "One or more of the following credentials were not provided: email, password, username"});
@@ -14,7 +14,7 @@ const createUser = async (req: Request, res: Response) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        const savedUser = await User.create({username, email, password: hashedPassword});
+        const savedUser = await User.create({username, email, password: hashedPassword, imgUrl});
         const tokens = createAuthTokens(savedUser._id.toString());
 
         savedUser.refreshTokens.push(tokens.refreshToken);
@@ -50,10 +50,10 @@ const getUserById = async (req: Request, res: Response) => {
 
 const updateUser = async (req: Request, res: Response) => {
     try {
-        const {username, email} = req.body;
+        const {username, email, imgUrl} = req.body;
         const updatedUser = await User.findByIdAndUpdate(
             req.params.id,
-            {username, email},
+            {username, email, imgUrl},
             {new: true}
         );
         if (!updatedUser) {

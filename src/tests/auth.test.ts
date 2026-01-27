@@ -10,7 +10,8 @@ let userId: string;
 const testUser = {
     username: 'authtest',
     email: 'auth@test.com',
-    password: 'password123'
+    password: 'password123',
+    imgUrl: 'http://image.com/auth.jpg'
 };
 
 beforeAll(async () => {

@@ -1,5 +1,6 @@
 import express, {Express} from "express";
 import mongoose from "mongoose";
+import cors from "cors";
 import postRoute from "./routes/posts";
 import userRoute from "./routes/users";
 import commentRoute from "./routes/comments";
@@ -10,6 +11,8 @@ import { swaggerSetup } from "./swagger";
 dotenv.config({ path: ".env.dev" });
 
 const app = express();
+
+app.use(cors());
 app.use(express.json());
 
 swaggerSetup(app);
