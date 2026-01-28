@@ -53,7 +53,7 @@ const createUser = async (req: Request, res: Response) => {
 
         await session.commitTransaction();
 
-        const userWithImage = await User.findById(savedUser._id).populate('profileImage', 'originalName mimetype size');
+        const userWithImage = await User.findById(savedUser._id);
 
         res.status(201).json(userWithImage);
     } catch (error: any) {
@@ -73,7 +73,7 @@ const createUser = async (req: Request, res: Response) => {
 
 const getAllUsers = async (req: Request, res: Response) => {
     try {
-        const users = await User.find().populate('profileImage', 'originalName mimetype size');
+        const users = await User.find();
         
         res.status(200).json(users);
     } catch (error: any) {
@@ -83,7 +83,7 @@ const getAllUsers = async (req: Request, res: Response) => {
 
 const getUserById = async (req: Request, res: Response) => {
     try {
-        const user = await User.findById(req.params.id).populate('profileImage', 'originalName mimetype size');
+        const user = await User.findById(req.params.id);
         
         if (!user) {
             return res.status(404).json({message: 'User not found'});

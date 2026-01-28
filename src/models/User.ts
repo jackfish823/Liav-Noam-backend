@@ -34,6 +34,18 @@ const userSchema = new Schema<IUser>({
         type: [String],
         default: [],
     },
-}, { timestamps: true });
+}, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } });
+
+userSchema.pre('find', function() {
+    this.populate('profileImage', 'originalName mimetype size');
+});
+
+userSchema.pre('findOne', function() {
+    this.populate('profileImage', 'originalName mimetype size');
+});
+
+userSchema.pre('findOneAndUpdate', function() {
+    this.populate('profileImage', 'originalName mimetype size');
+});
 
 export default mongoose.model<IUser>('User', userSchema);

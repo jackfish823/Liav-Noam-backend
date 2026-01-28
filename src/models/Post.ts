@@ -3,7 +3,6 @@ import mongoose, {Document, Schema } from 'mongoose';
 export interface IPost extends Document {
     message: string;
     author: mongoose.Types.ObjectId;
-    comments?: any[];
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -24,10 +23,26 @@ const postSchema = new Schema<IPost>({
     toObject: { virtuals: true }
 });
 
-postSchema.virtual('comments', {
+postSchema.virtual('commentsCount', {
     ref: 'Comment',
     localField: '_id',
-    foreignField: 'postId'
+    foreignField: 'postId',
+    count: true
+});
+
+postSchema.pre('find', function() {
+    this.populate('author');
+    this.populate('commentsCount');
+});
+
+postSchema.pre('findOne', function() {
+    this.populate('author');
+    this.populate('commentsCount');
+});
+
+postSchema.pre('findOneAndUpdate', function() {
+    this.populate('author');
+    this.populate('commentsCount');
 });
 
 export default mongoose.model<IPost>('Post', postSchema);
