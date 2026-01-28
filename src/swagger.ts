@@ -44,6 +44,10 @@ const options = {
                         type: "string",
                         description: "The password of the user",
                     },
+                    profileImage: {
+                        type: "string",
+                        description: "The ID of the user's profile image",
+                    },
                     createdAt: {
                         type: "string",
                         format: "date-time",
@@ -60,6 +64,7 @@ const options = {
                     username: "johndoe",
                     email: "johndoe@example.com",
                     password: "password123",
+                    profileImage: "60d0fe4f5311236168a109cd",
                     createdAt: "2021-06-21T18:30:00.000Z",
                     updatedAt: "2021-06-21T18:30:00.000Z",
                 },
@@ -133,6 +138,60 @@ const options = {
                     body: "This is a test comment",
                     postId: "60d0fe4f5311236168a109cb",
                     author: "60d0fe4f5311236168a109ca",
+                    createdAt: "2021-06-21T18:30:00.000Z",
+                    updatedAt: "2021-06-21T18:30:00.000Z",
+                },
+            },
+            Image: {
+                type: "object",
+                properties: {
+                    _id: {
+                        type: "string",
+                        description: "The auto-generated id of the image",
+                    },
+                    filename: {
+                        type: "string",
+                        description: "The unique filename stored on server",
+                    },
+                    originalName: {
+                        type: "string",
+                        description: "The original filename uploaded by user",
+                    },
+                    mimetype: {
+                        type: "string",
+                        description: "The MIME type of the image",
+                    },
+                    size: {
+                        type: "number",
+                        description: "The size of the image in bytes",
+                    },
+                    path: {
+                        type: "string",
+                        description: "The file path on server",
+                    },
+                    uploadedBy: {
+                        type: "string",
+                        description: "The user id of the uploader",
+                    },
+                    createdAt: {
+                        type: "string",
+                        format: "date-time",
+                        description: "The date the image was uploaded",
+                    },
+                    updatedAt: {
+                        type: "string",
+                        format: "date-time",
+                        description: "The date the image metadata was updated",
+                    },
+                },
+                example: {
+                    _id: "60d0fe4f5311236168a109cd",
+                    filename: "a1b2c3d4-e5f6-7890-abcd-ef1234567890.jpg",
+                    originalName: "vacation-photo.jpg",
+                    mimetype: "image/jpeg",
+                    size: 1024000,
+                    path: "uploads/a1b2c3d4-e5f6-7890-abcd-ef1234567890.jpg",
+                    uploadedBy: "60d0fe4f5311236168a109ca",
                     createdAt: "2021-06-21T18:30:00.000Z",
                     updatedAt: "2021-06-21T18:30:00.000Z",
                 },

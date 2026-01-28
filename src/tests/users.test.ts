@@ -27,13 +27,11 @@ describe('Users API', () => {
         const response = await request(app).post('/user').send({
             username: 'testuser',
             email: 'test@test.com',
-            password: 'password',
-            imgUrl: 'http://image.com/user.jpg'
+            password: 'password'
         });
         expect(response.status).toBe(201);
         expect(response.body.username).toBe('testuser');
         expect(response.body.email).toBe('test@test.com');
-        expect(response.body.imgUrl).toBe('http://image.com/user.jpg');
         userId = response.body._id;
     });
 
@@ -81,13 +79,11 @@ describe('Users API', () => {
     test('PUT /user/:id should update a user', async () => {
         const response = await request(app).put(`/user/${userId}`).send({
             username: 'updateduser',
-            email: 'updated@test.com',
-            imgUrl: 'http://image.com/updateduser.jpg'
+            email: 'updated@test.com'
         });
         expect(response.status).toBe(200);
         expect(response.body.username).toBe('updateduser');
         expect(response.body.email).toBe('updated@test.com');
-        expect(response.body.imgUrl).toBe('http://image.com/updateduser.jpg');
     });
 
     test('PUT /user/:id should return 404 for non-existent id', async () => {

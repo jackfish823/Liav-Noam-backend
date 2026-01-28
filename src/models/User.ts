@@ -4,7 +4,7 @@ export interface IUser extends Document {
     username: string;
     email: string;
     password: string;
-    imgUrl?: string;
+    profileImage?: mongoose.Types.ObjectId;
     refreshTokens: string[]
 
     createdAt?: Date;
@@ -26,13 +26,26 @@ const userSchema = new Schema<IUser>({
         type: String,
         required: true,
     },
-    imgUrl: {
-        type: String,
+    profileImage: {
+        type: Schema.Types.ObjectId,
+        ref: 'Image',
     },
     refreshTokens: {
         type: [String],
         default: [],
     },
-}, {timestamps: true});
+}, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } });
+
+userSchema.pre('find', function() {
+    this.populate('profileImage', 'originalName mimetype size');
+});
+
+userSchema.pre('findOne', function() {
+    this.populate('profileImage', 'originalName mimetype size');
+});
+
+userSchema.pre('findOneAndUpdate', function() {
+    this.populate('profileImage', 'originalName mimetype size');
+});
 
 export default mongoose.model<IUser>('User', userSchema);

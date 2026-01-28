@@ -6,7 +6,7 @@ const getPosts= async (req: Request, res: Response) => {
     try {
         const author = req.query.author as string;
         const filter = author ? {author} : {};
-        const posts = await Post.find(filter).populate('author').populate('comments');
+        const posts = await Post.find(filter);
 
         res.status(200).json(posts);
     } catch (error: any) {
@@ -29,7 +29,7 @@ const createPost = async (req: AuthRequest, res: Response) => {
 
 const getPostById = async (req: Request, res: Response) => {
     try {
-        const post = await Post.findById(req.params.id).populate('author').populate('comments');
+        const post = await Post.findById(req.params.id);
 
         if (!post) {
             res.status(404).json({message: 'Post not found'});

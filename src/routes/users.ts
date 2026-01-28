@@ -1,5 +1,6 @@
 import express from 'express';
 import usersController from '../controllers/users';
+import { upload } from '../utils/multer';
 
 const router = express.Router();
 
@@ -14,14 +15,18 @@ const router = express.Router();
  * @swagger
  * /user:
  *   post:
- *     summary: Create a new user
+ *     summary: Create a new user (register)
  *     tags: [Users]
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
+ *             required:
+ *               - username
+ *               - email
+ *               - password
  *             properties:
  *               username:
  *                 type: string
@@ -29,6 +34,10 @@ const router = express.Router();
  *                 type: string
  *               password:
  *                 type: string
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *                 description: Optional profile image (JPEG/PNG, max 5MB)
  *     responses:
  *       201:
  *         description: User created successfully
@@ -41,7 +50,7 @@ const router = express.Router();
  *       409:
  *         description: User already exists
  */
-router.post('/', usersController.createUser);
+router.post('/', upload.single('image'), usersController.createUser);
 
 /**
  * @swagger
