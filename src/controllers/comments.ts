@@ -9,6 +9,8 @@ const getComments = async (req: Request, res: Response) => {
 
     const postId = req.query.postId ?? '';
     const author = req.query.author ?? '';
+    const cursor = req.query.cursor as string;
+    const limit = parseInt(req.query.limit as string) || 10;
 
     if (postId) {
         query.postId = postId;
@@ -18,15 +20,33 @@ const getComments = async (req: Request, res: Response) => {
         query.author = author;
     }
 
-    try {
-        const comments = await Comment.find(query).populate('author');
+    if (cursor) {
+        query._id = { $lt: cursor };
+    }
 
-        res.status(200).json(comments);
+    try {
+        const comments = await Comment.find(query)
+            .populate('author')
+            .sort({ _id: -1 })
+            .limit(limit + 1);
+
+        const hasMore = comments.length > limit;
+        const results = hasMore ? comments.slice(0, limit) : comments;
+        const nextCursor = hasMore ? results[results.length - 1]._id.toString() : null;
+
+        res.status(200).json({
+            comments: results,
+            pagination: {
+                nextCursor,
+                hasMore,
+                limit
+            }
+        });
     } catch (error) {
         console.error({
-            message: 'Filed getting posts comments',
+            message: 'Failed getting posts comments',
             error,
-            additionalData: {postId, author}
+            additionalData: {postId, author, cursor, limit}
         });
 
         res.status(500).json({message: 'Failed getting posts comments'});

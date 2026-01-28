@@ -81,17 +81,36 @@ describe('Comments API', () => {
     });
 
     describe('GET /comment', () => {
-        test('should get all comments', async () => {
+        test('should get all comments with cursor pagination', async () => {
             const response = await request(app).get('/comment');
             expect(response.status).toBe(200);
-            expect(Array.isArray(response.body)).toBeTruthy();
-            expect(response.body.length).toBeGreaterThan(0);
+            expect(response.body).toHaveProperty('comments');
+            expect(response.body).toHaveProperty('pagination');
+            expect(Array.isArray(response.body.comments)).toBeTruthy();
+            expect(response.body.comments.length).toBeGreaterThan(0);
+            expect(response.body.pagination).toHaveProperty('nextCursor');
+            expect(response.body.pagination).toHaveProperty('hasMore');
+            expect(response.body.pagination).toHaveProperty('limit');
         });
 
         test('should filter comments by postId', async () => {
             const response = await request(app).get(`/comment?postId=${postId}`);
             expect(response.status).toBe(200);
-            expect(response.body[0].postId).toBe(postId);
+            expect(response.body.comments[0].postId).toBe(postId);
+        });
+
+        test('should paginate comments with cursor', async () => {
+            const firstResponse = await request(app).get('/comment?limit=1');
+            expect(firstResponse.status).toBe(200);
+            expect(firstResponse.body.comments.length).toBeLessThanOrEqual(1);
+            expect(firstResponse.body.pagination.limit).toBe(1);
+
+            if (firstResponse.body.pagination.hasMore) {
+                const cursor = firstResponse.body.pagination.nextCursor;
+                const secondResponse = await request(app).get(`/comment?cursor=${cursor}&limit=1`);
+                expect(secondResponse.status).toBe(200);
+                expect(secondResponse.body.comments[0]._id).not.toBe(firstResponse.body.comments[0]._id);
+            }
         });
     });
 

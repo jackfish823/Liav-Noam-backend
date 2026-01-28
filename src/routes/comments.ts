@@ -15,7 +15,7 @@ const router = express.Router();
  * @swagger
  * /comment:
  *   get:
- *     summary: Get all comments
+ *     summary: Get all comments with cursor-based pagination
  *     tags: [Comments]
  *     parameters:
  *       - in: query
@@ -23,15 +23,47 @@ const router = express.Router();
  *         schema:
  *           type: string
  *         description: Filter comments by post ID
+ *       - in: query
+ *         name: author
+ *         schema:
+ *           type: string
+ *         description: Filter comments by author ID
+ *       - in: query
+ *         name: cursor
+ *         schema:
+ *           type: string
+ *         description: Cursor for pagination (comment ID to start after)
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of comments to return
  *     responses:
  *       200:
- *         description: List of comments
+ *         description: Paginated list of comments with cursor
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Comment'
+ *               type: object
+ *               properties:
+ *                 comments:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Comment'
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     nextCursor:
+ *                       type: string
+ *                       nullable: true
+ *                       description: Cursor for the next page (null if no more results)
+ *                     hasMore:
+ *                       type: boolean
+ *                       description: Whether there are more results available
+ *                     limit:
+ *                       type: integer
+ *                       description: Number of items per page
  */
 router.get('/', commentsController.getComments);
 

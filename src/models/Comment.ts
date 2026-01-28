@@ -25,5 +25,8 @@ const CommentSchema = new Schema<IComment>({
     }
 }, { timestamps: true });
 
+CommentSchema.index({ postId: 1, _id: -1 });
+CommentSchema.index({ author: 1, _id: -1 });
+
 export default mongoose.model<IComment>('Comment', CommentSchema);
 

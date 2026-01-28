@@ -2,15 +2,48 @@ import {Request, Response} from 'express';
 import Post from '../models/Post';
 import { AuthRequest } from '../middleware/auth';
 
-const getPosts= async (req: Request, res: Response) => {
-    try {
-        const author = req.query.author as string;
-        const filter = author ? {author} : {};
-        const posts = await Post.find(filter);
+type PostQuery = Record<string, any>;
 
-        res.status(200).json(posts);
+const getPosts= async (req: Request, res: Response) => {
+    const query: PostQuery = {};
+
+    const author = req.query.author as string;
+    const cursor = req.query.cursor as string;
+    const limit = parseInt(req.query.limit as string) || 10;
+
+    if (author) {
+        query.author = author;
+    }
+
+    if (cursor) {
+        query._id = { $lt: cursor };
+    }
+
+    try {
+        const posts = await Post.find(query)
+            .sort({ _id: -1 })
+            .limit(limit + 1);
+
+        const hasMore = posts.length > limit;
+        const results = hasMore ? posts.slice(0, limit) : posts;
+        const nextCursor = hasMore ? results[results.length - 1]._id.toString() : null;
+
+        res.status(200).json({
+            posts: results,
+            pagination: {
+                nextCursor,
+                hasMore,
+                limit
+            }
+        });
     } catch (error: any) {
-        res.status(500).json({message: error.message});
+        console.error({
+            message: 'Failed getting posts',
+            error,
+            additionalData: {author, cursor, limit}
+        });
+
+        res.status(500).json({message: 'Failed getting posts'});
     }
 };
 
