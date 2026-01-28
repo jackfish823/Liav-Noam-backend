@@ -15,7 +15,7 @@ const router = express.Router();
  * @swagger
  * /post:
  *   get:
- *     summary: Get all posts
+ *     summary: Get all posts with cursor-based pagination
  *     tags: [Posts]
  *     parameters:
  *       - in: query
@@ -23,15 +23,42 @@ const router = express.Router();
  *         schema:
  *           type: string
  *         description: Filter posts by author ID
+ *       - in: query
+ *         name: cursor
+ *         schema:
+ *           type: string
+ *         description: Cursor for pagination (ID of the last post from previous page)
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of posts to return per page
  *     responses:
  *       200:
- *         description: List of posts
+ *         description: Paginated list of posts
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Post'
+ *               type: object
+ *               properties:
+ *                 posts:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Post'
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     nextCursor:
+ *                       type: string
+ *                       nullable: true
+ *                       description: Cursor for the next page (null if no more pages)
+ *                     hasMore:
+ *                       type: boolean
+ *                       description: Whether there are more pages available
+ *                     limit:
+ *                       type: integer
+ *                       description: Number of items per page
  */
 router.get('/', postsController.getPosts);
 

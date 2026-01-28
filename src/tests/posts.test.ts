@@ -39,10 +39,12 @@ afterAll(async () => {
 });
 
 describe('Posts API', () => {
-    test('GET /post should return empty array initially', async () => {
+    test('GET /post should return empty results with pagination initially', async () => {
         const response = await request(app).get('/post');
         expect(response.status).toBe(200);
-        expect(response.body).toEqual([]);
+        expect(response.body.posts).toEqual([]);
+        expect(response.body.pagination.hasMore).toBe(false);
+        expect(response.body.pagination.nextCursor).toBeNull();
     });
 
     test('POST /post should create a new post', async () => {
@@ -64,13 +66,14 @@ describe('Posts API', () => {
         expect(response.status).toBe(409);
     });
 
-    test('GET /post should return all posts', async () => {
+    test('GET /post should return all posts with pagination', async () => {
         const response = await request(app).get('/post');
         expect(response.status).toBe(200);
-        expect(response.body.length).toBe(1);
-        expect(response.body[0].message).toBe('Test Message');
-        // Check population
-        expect(response.body[0].author._id).toBe(userId);
+        expect(response.body.posts.length).toBe(1);
+        expect(response.body.posts[0].message).toBe('Test Message');
+        expect(response.body.posts[0].author._id).toBe(userId);
+        expect(response.body.pagination.hasMore).toBe(false);
+        expect(response.body.pagination.nextCursor).toBeNull();
     });
 
     test('GET /post/:id should return a post by id', async () => {
@@ -89,8 +92,29 @@ describe('Posts API', () => {
     test('GET /post?author=ID should return posts by author', async () => {
         const response = await request(app).get(`/post?author=${userId}`);
         expect(response.status).toBe(200);
-        expect(response.body.length).toBe(1);
-        expect(response.body[0].author._id).toBe(userId);
+        expect(response.body.posts.length).toBe(1);
+        expect(response.body.posts[0].author._id).toBe(userId);
+    });
+
+    test('GET /post with cursor pagination should work correctly', async () => {
+        await request(app).post('/post')
+            .set('Authorization', 'Bearer ' + accessToken)
+            .send({ message: 'Post 2' });
+        await request(app).post('/post')
+            .set('Authorization', 'Bearer ' + accessToken)
+            .send({ message: 'Post 3' });
+
+        const firstPage = await request(app).get('/post?limit=2');
+        expect(firstPage.status).toBe(200);
+        expect(firstPage.body.posts.length).toBe(2);
+        expect(firstPage.body.pagination.hasMore).toBe(true);
+        expect(firstPage.body.pagination.nextCursor).toBeDefined();
+
+        const secondPage = await request(app).get(`/post?limit=2&cursor=${firstPage.body.pagination.nextCursor}`);
+        expect(secondPage.status).toBe(200);
+        expect(secondPage.body.posts.length).toBe(1);
+        expect(secondPage.body.pagination.hasMore).toBe(false);
+        expect(secondPage.body.pagination.nextCursor).toBeNull();
     });
 
     test('PUT /post/:id should update a post', async () => {

@@ -30,6 +30,8 @@ postSchema.virtual('commentsCount', {
     count: true
 });
 
+postSchema.index({ author: 1, _id: -1 });
+
 postSchema.pre('find', function() {
     this.populate('author');
     this.populate('commentsCount');
