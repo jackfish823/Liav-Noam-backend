@@ -1,35 +1,80 @@
 import {Request, Response} from 'express';
 import bcrypt from 'bcrypt';
+import fs from 'fs';
+import mongoose from 'mongoose';
 import User from '../models/User';
+import Image from '../models/Image';
 import {createAuthTokens} from '../utils/jwt';
 
 const createUser = async (req: Request, res: Response) => {
-    const {username, email, password, imgUrl} = req.body;
+    const {username, email, password} = req.body;
 
     if (!username || !password || !email) {
         res.status(400).json({message: "One or more of the following credentials were not provided: email, password, username"});
+        return;
     }
+
+    const session = await mongoose.startSession();
+
+    session.startTransaction();
 
     try {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        const savedUser = await User.create({username, email, password: hashedPassword, imgUrl});
+        const [savedUser] = await User.create([{
+            username,
+            email,
+            password: hashedPassword
+        }], { session });
+
+        if (req.file) {
+            const imageData = {
+                filename: req.file.filename,
+                originalName: req.file.originalname,
+                mimetype: req.file.mimetype,
+                size: req.file.size,
+                path: req.file.path,
+                uploadedBy: savedUser._id,
+            };
+
+            const [image] = await Image.create([imageData], { session });
+
+            savedUser.profileImage = image._id;
+            
+            await savedUser.save({ session });
+        }
+
         const tokens = createAuthTokens(savedUser._id.toString());
 
         savedUser.refreshTokens.push(tokens.refreshToken);
 
-        await savedUser.save();
+        await savedUser.save({ session });
 
-        res.status(201).json(savedUser);
+        await session.commitTransaction();
+
+        const userWithImage = await User.findById(savedUser._id).populate('profileImage', 'originalName mimetype size');
+
+        res.status(201).json(userWithImage);
     } catch (error: any) {
+        await session.abortTransaction();
+
+        if (req.file) {
+            fs.unlink(req.file.path, (err) => {
+                if (err) console.error('Error deleting file:', err);
+            });
+        }
+
         res.status(409).json({message: error.message});
+    } finally {
+        session.endSession();
     }
 };
 
 const getAllUsers = async (req: Request, res: Response) => {
     try {
-        const users = await User.find();
+        const users = await User.find().populate('profileImage', 'originalName mimetype size');
+        
         res.status(200).json(users);
     } catch (error: any) {
         res.status(500).json({message: error.message});
@@ -38,10 +83,12 @@ const getAllUsers = async (req: Request, res: Response) => {
 
 const getUserById = async (req: Request, res: Response) => {
     try {
-        const user = await User.findById(req.params.id);
+        const user = await User.findById(req.params.id).populate('profileImage', 'originalName mimetype size');
+        
         if (!user) {
             return res.status(404).json({message: 'User not found'});
         }
+
         res.status(200).json(user);
     } catch (error: any) {
         res.status(500).json({message: error.message});
@@ -50,10 +97,10 @@ const getUserById = async (req: Request, res: Response) => {
 
 const updateUser = async (req: Request, res: Response) => {
     try {
-        const {username, email, imgUrl} = req.body;
+        const {username, email, profileImage} = req.body;
         const updatedUser = await User.findByIdAndUpdate(
             req.params.id,
-            {username, email, imgUrl},
+            {username, email, profileImage},
             {new: true}
         );
         if (!updatedUser) {

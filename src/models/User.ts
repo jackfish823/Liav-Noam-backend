@@ -4,7 +4,7 @@ export interface IUser extends Document {
     username: string;
     email: string;
     password: string;
-    imgUrl?: string;
+    profileImage?: mongoose.Types.ObjectId;
     refreshTokens: string[]
 
     createdAt?: Date;
@@ -26,13 +26,14 @@ const userSchema = new Schema<IUser>({
         type: String,
         required: true,
     },
-    imgUrl: {
-        type: String,
+    profileImage: {
+        type: Schema.Types.ObjectId,
+        ref: 'Image',
     },
     refreshTokens: {
         type: [String],
         default: [],
     },
-}, {timestamps: true});
+}, { timestamps: true });
 
 export default mongoose.model<IUser>('User', userSchema);
