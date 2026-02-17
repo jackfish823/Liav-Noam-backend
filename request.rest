@@ -117,6 +117,14 @@ Content-Type: application/json
   "password": "password123"
 }
 
+### Google OAuth Login
+POST http://localhost:3000/auth/google
+Content-Type: application/json
+
+{
+  "credential": "YOUR_GOOGLE_ACCESS_TOKEN"
+}
+
 ### Refresh token
 POST http://localhost:3000/auth/refresh
 Content-Type: application/json

@@ -1,5 +1,6 @@
 import {Request, Response} from 'express';
 import bcrypt from 'bcrypt';
+import crypto from 'crypto';
 import User, { IUser } from '../models/User';
 import {createAuthTokens, verifyToken} from '../utils/jwt';
 
@@ -110,8 +111,67 @@ const refresh = async (req: Request, res: Response) => {
     }
 };
 
+const googleAuth = async (req: Request, res: Response) => {
+    const {credential} = req.body;
+
+    if (!credential) {
+        res.status(400).json({message: "Google credential is required"});
+        return;
+    }
+
+    try {
+        const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+            headers: {
+                'Authorization': `Bearer ${credential}`
+            }
+        });
+
+        if (!response.ok) {
+            res.status(401).json({message: "Invalid Google credential"});
+            return;
+        }
+
+        const googleUser = await response.json();
+
+        if (!googleUser.email_verified) {
+            res.status(403).json({message: "Google email not verified"});
+            return;
+        }
+
+        let user = await User.findOne({email: googleUser.email});
+
+        if (!user) {
+            const randomPassword = crypto.randomBytes(32).toString('hex');
+            const hashedPassword = await bcrypt.hash(randomPassword, 10);
+
+            user = new User({
+                username: googleUser.name || googleUser.email.split('@')[0],
+                email: googleUser.email,
+                password: hashedPassword,
+            });
+
+            await user.save();
+        }
+
+        const tokens = createAuthTokens(user._id.toString());
+
+        user.refreshTokens.push(tokens.refreshToken);
+
+        await user.save();
+
+        res.status(200).json({
+            ...tokens,
+            _id: user._id
+        });
+    } catch (error: any) {
+        console.error("Google OAuth error:", error);
+        res.status(500).json({message: "Failed to authenticate with Google"});
+    }
+};
+
 export default {
     login,
     logout,
-    refresh
+    refresh,
+    googleAuth
 };
