@@ -1,7 +1,7 @@
 import {NextFunction, Request, Response} from 'express';
 import {verifyToken} from '../utils/jwt';
 
-const AUTH_HEADER_PREFIX = "Bearer "
+const AUTH_HEADER_PREFIX = "Bearer ";
 
 export interface AuthRequest extends Request {
     user?: any;

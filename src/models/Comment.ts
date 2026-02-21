@@ -4,6 +4,8 @@ export interface IComment extends Document {
     body: string;
     postId: mongoose.Types.ObjectId;
     author: mongoose.Types.ObjectId;
+    upCount: number;
+    downCount: number;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -22,7 +24,15 @@ const CommentSchema = new Schema<IComment>({
         type: Schema.Types.ObjectId,
         ref: 'User',
         required: true,
-    }
+    },
+    upCount: {
+        type: Number,
+        default: 0,
+    },
+    downCount: {
+        type: Number,
+        default: 0,
+    },
 }, { timestamps: true });
 
 CommentSchema.index({ postId: 1, _id: -1 });

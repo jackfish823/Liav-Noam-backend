@@ -65,6 +65,8 @@ const router = express.Router();
  *                       type: integer
  *                       description: Number of items per page
  */
+router.use(authMiddleware);
+
 router.get('/', commentsController.getComments);
 
 /**
@@ -90,8 +92,6 @@ router.get('/', commentsController.getComments);
  *         description: Comment not found
  */
 router.get('/:id', commentsController.getCommentById);
-
-router.use(authMiddleware);
 
 /**
  * @swagger
@@ -187,5 +187,76 @@ router.put('/:id', commentsController.updateComment);
  *         description: Unauthorized
  */
 router.delete('/:id', commentsController.deleteComment);
+
+/**
+ * @swagger
+ * /comment/{id}/vote:
+ *   post:
+ *     summary: Upvote or downvote a comment
+ *     tags: [Comments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - value
+ *             properties:
+ *               value:
+ *                 type: integer
+ *                 enum: [1, -1]
+ *                 description: 1 for upvote, -1 for downvote
+ *     responses:
+ *       200:
+ *         description: Vote recorded
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Comment'
+ *       400:
+ *         description: value must be 1 or -1
+ *       404:
+ *         description: Comment not found
+ *       401:
+ *         description: Unauthorized
+ */
+router.post('/:id/vote', commentsController.voteComment);
+
+/**
+ * @swagger
+ * /comment/{id}/vote:
+ *   delete:
+ *     summary: Remove vote from a comment
+ *     tags: [Comments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Vote removed
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Comment'
+ *       404:
+ *         description: Vote not found
+ *       401:
+ *         description: Unauthorized
+ */
+router.delete('/:id/vote', commentsController.removeCommentVote);
 
 export default router;
