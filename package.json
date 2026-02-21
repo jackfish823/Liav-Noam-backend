@@ -4,9 +4,9 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "start": "tsc && node --env-file=.env.dev ./dist/src/server.js",
-    "dev": "nodemon  ./src/server.ts",
-    "test": "tsc && jest --runInBand --detectOpenHandles --coverage --forceExit"
+    "start": "NODE_ENV=production tsc && node ./dist/src/server.js",
+    "dev": "NODE_ENV=development nodemon ./src/server.ts",
+    "test": "NODE_ENV=test tsc && jest --runInBand --detectOpenHandles --coverage --forceExit"
   },
   "author": "",
   "license": "ISC",

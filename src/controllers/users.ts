@@ -98,14 +98,29 @@ const getUserById = async (req: Request, res: Response) => {
 const updateUser = async (req: Request, res: Response) => {
     try {
         const {username, email, profileImage} = req.body;
+        const updateData: any = {};
+
+        if (username) updateData.username = username;
+        if (email) updateData.email = email;
+
+        if ('profileImage' in req.body) {
+            if (profileImage) {
+                updateData.profileImage = profileImage;
+            } else {
+                updateData.profileImage = null;
+            }
+        }
+
         const updatedUser = await User.findByIdAndUpdate(
             req.params.id,
-            {username, email, profileImage},
+            updateData,
             {new: true}
         );
+
         if (!updatedUser) {
             return res.status(404).json({message: 'User not found'});
         }
+
         res.status(200).json(updatedUser);
     } catch (error: any) {
         res.status(500).json({message: error.message});

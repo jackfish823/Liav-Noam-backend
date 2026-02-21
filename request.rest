@@ -22,8 +22,16 @@ Content-Type: application/json
 
 {
   "username": "johndoe_updated",
-  "email": "john_updated@example.com",
-  "password": "newpassword456"
+  "email": "john_updated@example.com"
+}
+
+### Update user and remove profile image
+PUT http://localhost:3000/user/USER_ID
+Content-Type: application/json
+
+{
+  "username": "johndoe_updated",
+  "profileImage": null
 }
 
 ### Delete a user
@@ -41,78 +49,53 @@ GET http://localhost:3000/post?author=USER_ID
 ### Get post by ID
 GET http://localhost:3000/post/694e5d377193f8baffa22040
 
-### Create a new post with image file upload (requires authentication)
+### Create a new post with image ID (requires authentication)
 POST http://localhost:3000/post
 Authorization: Bearer YOUR_ACCESS_TOKEN
-Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Type: application/json
 
-------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="message"
-
-Hello, world!
-------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="image"; filename="post-image.jpg"
-Content-Type: image/jpeg
-
-< ./path/to/your/image.jpg
-------WebKitFormBoundary7MA4YWxkTrZu0gW--
-
-### Create a new post with existing image ID (requires authentication)
-POST http://localhost:3000/post
-Authorization: Bearer YOUR_ACCESS_TOKEN
-Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
-
-------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="message"
-
-Hello, world!
-------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="image"
-
-IMAGE_ID_HERE
-------WebKitFormBoundary7MA4YWxkTrZu0gW--
+{
+  "message": "Hello, world!",
+  "image": "IMAGE_ID_HERE"
+}
 
 ### Create a new post without image (requires authentication)
 POST http://localhost:3000/post
 Authorization: Bearer YOUR_ACCESS_TOKEN
-Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Type: application/json
 
-------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="message"
+{
+  "message": "Hello, world!"
+}
 
-Hello, world!
-------WebKitFormBoundary7MA4YWxkTrZu0gW--
-
-### Update a post with new image file (requires authentication)
+### Update a post with image ID (requires authentication)
 PUT http://localhost:3000/post/POST_ID
 Authorization: Bearer YOUR_ACCESS_TOKEN
-Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Type: application/json
 
-------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="message"
+{
+  "message": "This is an updated message.",
+  "image": "IMAGE_ID_HERE"
+}
 
-This is an updated message.
-------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="image"; filename="updated-image.jpg"
-Content-Type: image/jpeg
-
-< ./path/to/your/image.jpg
-------WebKitFormBoundary7MA4YWxkTrZu0gW--
-
-### Update a post with existing image ID (requires authentication)
+### Update a post and remove image (requires authentication)
 PUT http://localhost:3000/post/POST_ID
 Authorization: Bearer YOUR_ACCESS_TOKEN
-Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Type: application/json
 
-------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="message"
+{
+  "message": "This is an updated message.",
+  "image": null
+}
 
-This is an updated message.
-------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="image"
+### Update only post message, keep existing image (requires authentication)
+PUT http://localhost:3000/post/POST_ID
+Authorization: Bearer YOUR_ACCESS_TOKEN
+Content-Type: application/json
 
-IMAGE_ID_HERE
-------WebKitFormBoundary7MA4YWxkTrZu0gW--
+{
+  "message": "This is an updated message."
+}
 
 ### Delete a post
 DELETE http://localhost:3000/post/POST_ID

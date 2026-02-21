@@ -1,8 +1,5 @@
 import {Request, Response} from 'express';
-import fs from 'fs';
-import mongoose from 'mongoose';
 import Post from '../models/Post';
-import Image from '../models/Image';
 import { AuthRequest } from '../middleware/auth';
 
 type PostQuery = Record<string, any>;
@@ -59,10 +56,6 @@ const createPost = async (req: AuthRequest, res: Response) => {
         return;
     }
 
-    const session = await mongoose.startSession();
-
-    session.startTransaction();
-
     try {
         const postData: any = {
             message,
@@ -73,42 +66,12 @@ const createPost = async (req: AuthRequest, res: Response) => {
             postData.image = image;
         }
 
-        const [savedPost] = await Post.create([postData], { session });
+        const savedPost = await Post.create(postData);
+        const postWithPopulatedData = await Post.findById(savedPost._id);
 
-        if (req.file) {
-            const imageData = {
-                filename: req.file.filename,
-                originalName: req.file.originalname,
-                mimetype: req.file.mimetype,
-                size: req.file.size,
-                path: req.file.path,
-                uploadedBy: author,
-            };
-
-            const [newImage] = await Image.create([imageData], { session });
-
-            savedPost.image = newImage._id;
-
-            await savedPost.save({ session });
-        }
-
-        await session.commitTransaction();
-
-        const postWithImage = await Post.findById(savedPost._id);
-
-        res.status(201).json(postWithImage);
+        res.status(201).json(postWithPopulatedData);
     } catch (error: any) {
-        await session.abortTransaction();
-
-        if (req.file) {
-            fs.unlink(req.file.path, (err) => {
-                if (err) console.error('Error deleting file:', err);
-            });
-        }
-
         res.status(409).json({message: error.message});
-    } finally {
-        session.endSession();
     }
 };
 
@@ -130,69 +93,30 @@ const getPostById = async (req: Request, res: Response) => {
 const updatePost = async (req: AuthRequest, res: Response) => {
     const {id} = req.params;
     const {message, image} = req.body;
-    const author = req.user._id;
-
-    const session = await mongoose.startSession();
-
-    session.startTransaction();
 
     try {
         const updateData: any = {};
 
         if (message) updateData.message = message;
-        if (image) updateData.image = image;
 
-        if (req.file) {
-            const imageData = {
-                filename: req.file.filename,
-                originalName: req.file.originalname,
-                mimetype: req.file.mimetype,
-                size: req.file.size,
-                path: req.file.path,
-                uploadedBy: author,
-            };
-
-            const [newImage] = await Image.create([imageData], { session });
-
-            updateData.image = newImage._id;
+        if ('image' in req.body) {
+            updateData.image = image || null;
         }
 
         const updatedPost = await Post.findByIdAndUpdate(
             id,
             updateData,
-            {new: true, session}
+            {new: true}
         );
 
         if (!updatedPost) {
-            await session.abortTransaction();
-
-            if (req.file) {
-                fs.unlink(req.file.path, (err) => {
-                    if (err) console.error('Error deleting file:', err);
-                });
-            }
-
             res.status(404).json({message: 'Post not found'});
             return;
         }
 
-        await session.commitTransaction();
-
-        const postWithImage = await Post.findById(updatedPost._id);
-
-        res.status(200).json(postWithImage);
+        res.status(200).json(updatedPost);
     } catch (error: any) {
-        await session.abortTransaction();
-
-        if (req.file) {
-            fs.unlink(req.file.path, (err) => {
-                if (err) console.error('Error deleting file:', err);
-            });
-        }
-
         res.status(500).json({message: error.message});
-    } finally {
-        session.endSession();
     }
 };
 

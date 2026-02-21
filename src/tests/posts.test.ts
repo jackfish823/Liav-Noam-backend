@@ -50,7 +50,7 @@ describe('Posts API', () => {
     test('POST /post should create a new post', async () => {
         const response = await request(app).post('/post')
             .set('Authorization', 'Bearer ' + accessToken)
-            .field('message', 'Test Message');
+            .send({ message: 'Test Message' });
         expect(response.status).toBe(201);
         expect(response.body.message).toBe('Test Message');
         expect(response.body.author._id).toBe(userId);
@@ -60,7 +60,7 @@ describe('Posts API', () => {
     test('POST /post should fail with missing fields', async () => {
         const response = await request(app).post('/post')
             .set('Authorization', 'Bearer ' + accessToken)
-            .field('invalidField', 'value');
+            .send({});
         expect(response.status).toBe(400);
     });
 
@@ -97,10 +97,10 @@ describe('Posts API', () => {
     test('GET /post with cursor pagination should work correctly', async () => {
         await request(app).post('/post')
             .set('Authorization', 'Bearer ' + accessToken)
-            .field('message', 'Post 2');
+            .send({ message: 'Post 2' });
         await request(app).post('/post')
             .set('Authorization', 'Bearer ' + accessToken)
-            .field('message', 'Post 3');
+            .send({ message: 'Post 3' });
 
         const firstPage = await request(app).get('/post?limit=2');
         expect(firstPage.status).toBe(200);
@@ -118,7 +118,7 @@ describe('Posts API', () => {
     test('PUT /post/:id should update a post', async () => {
         const response = await request(app).put(`/post/${postId}`)
             .set('Authorization', 'Bearer ' + accessToken)
-            .field('message', 'Updated Message');
+            .send({ message: 'Updated Message' });
         expect(response.status).toBe(200);
         expect(response.body.message).toBe('Updated Message');
     });
@@ -127,7 +127,7 @@ describe('Posts API', () => {
         const fakeId = new mongoose.Types.ObjectId();
         const response = await request(app).put(`/post/${fakeId}`)
             .set('Authorization', 'Bearer ' + accessToken)
-            .field('message', 'Updated Message');
+            .send({ message: 'Updated Message' });
         expect(response.status).toBe(404);
     });
 
