@@ -1,6 +1,7 @@
 import express from 'express';
 import postsController from '../controllers/posts';
 import authMiddleware from '../middleware/auth';
+import { upload } from '../utils/multer';
 
 const router = express.Router();
 
@@ -99,12 +100,21 @@ router.use(authMiddleware);
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
+ *             required:
+ *               - message
  *             properties:
  *               message:
  *                 type: string
+ *               image:
+ *                 oneOf:
+ *                   - type: string
+ *                     description: Image ID (reference to existing image)
+ *                   - type: string
+ *                     format: binary
+ *                     description: Image file to upload (JPEG/PNG, max 5MB)
  *     responses:
  *       201:
  *         description: Post created
@@ -112,10 +122,12 @@ router.use(authMiddleware);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Post'
+ *       400:
+ *         description: Missing required fields
  *       401:
  *         description: Unauthorized
  */
-router.post('/', postsController.createPost);
+router.post('/', upload.single('image'), postsController.createPost);
 
 /**
  * @swagger
@@ -133,12 +145,19 @@ router.post('/', postsController.createPost);
  *           type: string
  *     requestBody:
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             properties:
  *               message:
  *                 type: string
+ *               image:
+ *                 oneOf:
+ *                   - type: string
+ *                     description: Image ID (reference to existing image)
+ *                   - type: string
+ *                     format: binary
+ *                     description: Image file to upload (JPEG/PNG, max 5MB)
  *     responses:
  *       200:
  *         description: Post updated
@@ -151,7 +170,7 @@ router.post('/', postsController.createPost);
  *       401:
  *         description: Unauthorized
  */
-router.put('/:id', postsController.updatePost);
+router.put('/:id', upload.single('image'), postsController.updatePost);
 
 /**
  * @swagger

@@ -50,20 +50,18 @@ describe('Posts API', () => {
     test('POST /post should create a new post', async () => {
         const response = await request(app).post('/post')
             .set('Authorization', 'Bearer ' + accessToken)
-            .send({
-                message: 'Test Message',
-            });
+            .field('message', 'Test Message');
         expect(response.status).toBe(201);
         expect(response.body.message).toBe('Test Message');
-        expect(response.body.author).toBe(userId);
+        expect(response.body.author._id).toBe(userId);
         postId = response.body._id;
     });
 
     test('POST /post should fail with missing fields', async () => {
         const response = await request(app).post('/post')
             .set('Authorization', 'Bearer ' + accessToken)
-            .send({});
-        expect(response.status).toBe(409);
+            .field('invalidField', 'value');
+        expect(response.status).toBe(400);
     });
 
     test('GET /post should return all posts with pagination', async () => {
@@ -99,10 +97,10 @@ describe('Posts API', () => {
     test('GET /post with cursor pagination should work correctly', async () => {
         await request(app).post('/post')
             .set('Authorization', 'Bearer ' + accessToken)
-            .send({ message: 'Post 2' });
+            .field('message', 'Post 2');
         await request(app).post('/post')
             .set('Authorization', 'Bearer ' + accessToken)
-            .send({ message: 'Post 3' });
+            .field('message', 'Post 3');
 
         const firstPage = await request(app).get('/post?limit=2');
         expect(firstPage.status).toBe(200);
@@ -120,9 +118,7 @@ describe('Posts API', () => {
     test('PUT /post/:id should update a post', async () => {
         const response = await request(app).put(`/post/${postId}`)
             .set('Authorization', 'Bearer ' + accessToken)
-            .send({
-                message: 'Updated Message',
-            });
+            .field('message', 'Updated Message');
         expect(response.status).toBe(200);
         expect(response.body.message).toBe('Updated Message');
     });
@@ -131,9 +127,7 @@ describe('Posts API', () => {
         const fakeId = new mongoose.Types.ObjectId();
         const response = await request(app).put(`/post/${fakeId}`)
             .set('Authorization', 'Bearer ' + accessToken)
-            .send({
-                message: 'Updated Message',
-            });
+            .field('message', 'Updated Message');
         expect(response.status).toBe(404);
     });
 
