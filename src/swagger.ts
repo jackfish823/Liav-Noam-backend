@@ -88,6 +88,14 @@ const options = {
                         type: "string",
                         description: "The ID of the post image",
                     },
+                    likeCount: {
+                        type: "integer",
+                        description: "Number of likes",
+                    },
+                    isLiked: {
+                        type: "boolean",
+                        description: "Whether the current user has liked this post (only when request is authenticated)",
+                    },
                     createdAt: {
                         type: "string",
                         format: "date-time",
@@ -104,6 +112,7 @@ const options = {
                     message: "This is a test post",
                     author: "60d0fe4f5311236168a109ca",
                     image: "60d0fe4f5311236168a109ce",
+                    likeCount: 12,
                     createdAt: "2021-06-21T18:30:00.000Z",
                     updatedAt: "2021-06-21T18:30:00.000Z",
                 },
@@ -127,6 +136,20 @@ const options = {
                         type: "string",
                         description: "The user id of the author",
                     },
+                    upCount: {
+                        type: "integer",
+                        description: "Number of upvotes",
+                    },
+                    downCount: {
+                        type: "integer",
+                        description: "Number of downvotes",
+                    },
+                    userVote: {
+                        type: "integer",
+                        nullable: true,
+                        enum: [1, -1, null],
+                        description: "Current user's vote: 1 upvote, -1 downvote, null no vote (only when request is authenticated)",
+                    },
                     createdAt: {
                         type: "string",
                         format: "date-time",
@@ -143,6 +166,9 @@ const options = {
                     body: "This is a test comment",
                     postId: "60d0fe4f5311236168a109cb",
                     author: "60d0fe4f5311236168a109ca",
+                    upCount: 10,
+                    downCount: 5,
+                    userVote: 1,
                     createdAt: "2021-06-21T18:30:00.000Z",
                     updatedAt: "2021-06-21T18:30:00.000Z",
                 },

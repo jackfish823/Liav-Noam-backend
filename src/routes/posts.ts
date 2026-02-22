@@ -60,6 +60,8 @@ const router = express.Router();
  *                       type: integer
  *                       description: Number of items per page
  */
+router.use(authMiddleware);
+
 router.get('/', postsController.getPosts);
 
 /**
@@ -85,8 +87,6 @@ router.get('/', postsController.getPosts);
  *         description: Post not found
  */
 router.get('/:id', postsController.getPostById);
-
-router.use(authMiddleware);
 
 /**
  * @swagger
@@ -187,5 +187,63 @@ router.put('/:id', postsController.updatePost);
  *         description: Unauthorized
  */
 router.delete('/:id', postsController.deletePost);
+
+/**
+ * @swagger
+ * /post/{id}/like:
+ *   post:
+ *     summary: Like a post
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       201:
+ *         description: Post liked
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Post'
+ *       404:
+ *         description: Post not found
+ *       409:
+ *         description: Post already liked
+ *       401:
+ *         description: Unauthorized
+ */
+router.post('/:id/like', postsController.likePost);
+
+/**
+ * @swagger
+ * /post/{id}/like:
+ *   delete:
+ *     summary: Remove like from a post
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Like removed
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Post'
+ *       404:
+ *         description: Like not found
+ *       401:
+ *         description: Unauthorized
+ */
+router.delete('/:id/like', postsController.unlikePost);
 
 export default router;

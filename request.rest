@@ -97,9 +97,17 @@ Content-Type: application/json
   "message": "This is an updated message."
 }
 
+### Like a post (requires authentication)
+POST http://localhost:3000/post/POST_ID/like
+Authorization: Bearer YOUR_ACCESS_TOKEN
+
+### Remove like from a post (requires authentication)
+DELETE http://localhost:3000/post/POST_ID/like
+Authorization: Bearer YOUR_ACCESS_TOKEN
+
 ### Delete a post
 DELETE http://localhost:3000/post/POST_ID
-
+Authorization: Bearer YOUR_ACCESS_TOKEN
 
 ### Comments
 
@@ -129,6 +137,19 @@ Content-Type: application/json
 {
   "body": "This is an updated comment."
 }
+
+### Upvote or downvote a comment (requires authentication)
+POST http://localhost:3000/comment/COMMENT_ID/vote
+Authorization: Bearer YOUR_ACCESS_TOKEN
+Content-Type: application/json
+
+{
+  "value": 1
+}
+
+### Remove vote from a comment (requires authentication)
+DELETE http://localhost:3000/comment/COMMENT_ID/vote
+Authorization: Bearer YOUR_ACCESS_TOKEN
 
 ### Delete a comment
 DELETE http://localhost:3000/comment/COMMENT_ID
