@@ -102,9 +102,14 @@ router.use(authMiddleware);
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - message
  *             properties:
  *               message:
  *                 type: string
+ *               image:
+ *                 type: string
+ *                 description: Optional image ID (reference to existing image)
  *     responses:
  *       201:
  *         description: Post created
@@ -112,6 +117,8 @@ router.use(authMiddleware);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Post'
+ *       400:
+ *         description: Missing required fields
  *       401:
  *         description: Unauthorized
  */
@@ -139,6 +146,10 @@ router.post('/', postsController.createPost);
  *             properties:
  *               message:
  *                 type: string
+ *               image:
+ *                 type: string
+ *                 nullable: true
+ *                 description: Image ID (or null to remove image)
  *     responses:
  *       200:
  *         description: Post updated

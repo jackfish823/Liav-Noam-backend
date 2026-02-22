@@ -48,13 +48,28 @@ const getPosts= async (req: Request, res: Response) => {
 };
 
 const createPost = async (req: AuthRequest, res: Response) => {
-    try {
-        const {message} = req.body;
-        const author = req.user._id;
-        
-        const savedPost = await Post.create({message, author});
+    const {message, image} = req.body;
+    const author = req.user._id;
 
-        res.status(201).json(savedPost);
+    if (!message) {
+        res.status(400).json({message: "Message is required"});
+        return;
+    }
+
+    try {
+        const postData: any = {
+            message,
+            author
+        };
+
+        if (image) {
+            postData.image = image;
+        }
+
+        const savedPost = await Post.create(postData);
+        const postWithPopulatedData = await Post.findById(savedPost._id);
+
+        res.status(201).json(postWithPopulatedData);
     } catch (error: any) {
         res.status(409).json({message: error.message});
     }
@@ -75,14 +90,22 @@ const getPostById = async (req: Request, res: Response) => {
     }
 };
 
-const updatePost = async (req: Request, res: Response) => {
+const updatePost = async (req: AuthRequest, res: Response) => {
+    const {id} = req.params;
+    const {message, image} = req.body;
+
     try {
-        const {id} = req.params;
-        const {message} = req.body;
-        
+        const updateData: any = {};
+
+        if (message) updateData.message = message;
+
+        if ('image' in req.body) {
+            updateData.image = image || null;
+        }
+
         const updatedPost = await Post.findByIdAndUpdate(
             id,
-            {message},
+            updateData,
             {new: true}
         );
 

@@ -22,8 +22,16 @@ Content-Type: application/json
 
 {
   "username": "johndoe_updated",
-  "email": "john_updated@example.com",
-  "password": "newpassword456"
+  "email": "john_updated@example.com"
+}
+
+### Update user and remove profile image
+PUT http://localhost:3000/user/USER_ID
+Content-Type: application/json
+
+{
+  "username": "johndoe_updated",
+  "profileImage": null
 }
 
 ### Delete a user
@@ -41,22 +49,52 @@ GET http://localhost:3000/post?author=USER_ID
 ### Get post by ID
 GET http://localhost:3000/post/694e5d377193f8baffa22040
 
-### Create a new post
+### Create a new post with image ID (requires authentication)
 POST http://localhost:3000/post
+Authorization: Bearer YOUR_ACCESS_TOKEN
 Content-Type: application/json
 
 {
   "message": "Hello, world!",
-  "author": "694e5c3e7193f8baffa2203e"
+  "image": "IMAGE_ID_HERE"
 }
 
-### Update a post
+### Create a new post without image (requires authentication)
+POST http://localhost:3000/post
+Authorization: Bearer YOUR_ACCESS_TOKEN
+Content-Type: application/json
+
+{
+  "message": "Hello, world!"
+}
+
+### Update a post with image ID (requires authentication)
 PUT http://localhost:3000/post/POST_ID
+Authorization: Bearer YOUR_ACCESS_TOKEN
 Content-Type: application/json
 
 {
   "message": "This is an updated message.",
-  "author": "USER_ID"
+  "image": "IMAGE_ID_HERE"
+}
+
+### Update a post and remove image (requires authentication)
+PUT http://localhost:3000/post/POST_ID
+Authorization: Bearer YOUR_ACCESS_TOKEN
+Content-Type: application/json
+
+{
+  "message": "This is an updated message.",
+  "image": null
+}
+
+### Update only post message, keep existing image (requires authentication)
+PUT http://localhost:3000/post/POST_ID
+Authorization: Bearer YOUR_ACCESS_TOKEN
+Content-Type: application/json
+
+{
+  "message": "This is an updated message."
 }
 
 ### Delete a post

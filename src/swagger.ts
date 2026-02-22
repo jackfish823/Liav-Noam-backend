@@ -84,6 +84,10 @@ const options = {
                         type: "string",
                         description: "The user id of the author",
                     },
+                    image: {
+                        type: "string",
+                        description: "The ID of the post image",
+                    },
                     createdAt: {
                         type: "string",
                         format: "date-time",
@@ -99,6 +103,7 @@ const options = {
                     _id: "60d0fe4f5311236168a109cb",
                     message: "This is a test post",
                     author: "60d0fe4f5311236168a109ca",
+                    image: "60d0fe4f5311236168a109ce",
                     createdAt: "2021-06-21T18:30:00.000Z",
                     updatedAt: "2021-06-21T18:30:00.000Z",
                 },

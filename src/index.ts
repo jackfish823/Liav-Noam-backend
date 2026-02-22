@@ -6,12 +6,12 @@ import userRoute from "./routes/users";
 import commentRoute from "./routes/comments";
 import authRoute from "./routes/auth";
 import imageRoute from "./routes/images";
-import dotenv from "dotenv";
 import { swaggerSetup } from "./swagger";
+import { loadEnvironmentConfig } from "./utils/env";
 import fs from "fs";
 import path from "path";
 
-dotenv.config({ path: ".env.dev" });
+loadEnvironmentConfig();
 
 const app = express();
 
@@ -35,16 +35,20 @@ app.use("/image", imageRoute);
 const initApp = () => {
     return new Promise<Express>((resolve, reject) => {
         const dbUrl = process.env.DATABASE_URL;
+
         if (!dbUrl) {
             reject("DATABASE_URL is not defined");
             return;
         }
+
         mongoose
-            .connect(dbUrl, {})
+            .connect(dbUrl)
             .then(() => {
                 resolve(app);
             });
+
         const db = mongoose.connection;
+
         db.on("error", (error) => console.error(error));
         db.once("open", () => console.log("Connected to Database"));
     });

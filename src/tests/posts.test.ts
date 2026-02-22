@@ -50,12 +50,10 @@ describe('Posts API', () => {
     test('POST /post should create a new post', async () => {
         const response = await request(app).post('/post')
             .set('Authorization', 'Bearer ' + accessToken)
-            .send({
-                message: 'Test Message',
-            });
+            .send({ message: 'Test Message' });
         expect(response.status).toBe(201);
         expect(response.body.message).toBe('Test Message');
-        expect(response.body.author).toBe(userId);
+        expect(response.body.author._id).toBe(userId);
         postId = response.body._id;
     });
 
@@ -63,7 +61,7 @@ describe('Posts API', () => {
         const response = await request(app).post('/post')
             .set('Authorization', 'Bearer ' + accessToken)
             .send({});
-        expect(response.status).toBe(409);
+        expect(response.status).toBe(400);
     });
 
     test('GET /post should return all posts with pagination', async () => {
@@ -120,9 +118,7 @@ describe('Posts API', () => {
     test('PUT /post/:id should update a post', async () => {
         const response = await request(app).put(`/post/${postId}`)
             .set('Authorization', 'Bearer ' + accessToken)
-            .send({
-                message: 'Updated Message',
-            });
+            .send({ message: 'Updated Message' });
         expect(response.status).toBe(200);
         expect(response.body.message).toBe('Updated Message');
     });
@@ -131,9 +127,7 @@ describe('Posts API', () => {
         const fakeId = new mongoose.Types.ObjectId();
         const response = await request(app).put(`/post/${fakeId}`)
             .set('Authorization', 'Bearer ' + accessToken)
-            .send({
-                message: 'Updated Message',
-            });
+            .send({ message: 'Updated Message' });
         expect(response.status).toBe(404);
     });
 
