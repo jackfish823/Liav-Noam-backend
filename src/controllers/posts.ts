@@ -4,6 +4,7 @@ import Post from '../models/Post';
 import Like from '../models/Like';
 import { AuthRequest } from '../middleware/auth';
 import { MONGO_ERROR_CODES } from '../constants/mongo';
+import { abortTransactionSafely, commitTransactionSafely, startTransactionSafely } from '../utils/transaction';
 
 type PostQuery = Record<string, any>;
 
@@ -171,13 +172,13 @@ const likePost = async (req: AuthRequest, res: Response) => {
 
     const session = await mongoose.startSession();
 
-    session.startTransaction();
+    startTransactionSafely(session);
 
     try {
         const post = await Post.findById(postId).session(session);
 
         if (!post) {
-            await session.abortTransaction();
+            await abortTransactionSafely(session);
 
             res.status(404).json({message: 'Post not found'});
 
@@ -187,13 +188,13 @@ const likePost = async (req: AuthRequest, res: Response) => {
         await Like.create([{ postId, userId }], { session });
         await Post.findByIdAndUpdate(postId, { $inc: { likeCount: 1 } }, { session });
 
-        await session.commitTransaction();
+        await commitTransactionSafely(session);
 
         const updatedPost = await Post.findById(postId);
 
         res.status(201).json(updatedPost);
     } catch (error: any) {
-        await session.abortTransaction();
+        await abortTransactionSafely(session);
 
         if (error.code === MONGO_ERROR_CODES.DUPLICATE_KEY) {
             res.status(409).json({message: 'Post already liked'});
@@ -213,13 +214,13 @@ const unlikePost = async (req: AuthRequest, res: Response) => {
     const userId = req.user._id;
 
     const session = await mongoose.startSession();
-    session.startTransaction();
+    startTransactionSafely(session);
 
     try {
         const deleteResult = await Like.deleteOne({ postId, userId }).session(session);
 
         if (deleteResult.deletedCount === 0) {
-            await session.abortTransaction();
+            await abortTransactionSafely(session);
 
             res.status(404).json({message: 'Like not found'});
 
@@ -228,13 +229,13 @@ const unlikePost = async (req: AuthRequest, res: Response) => {
 
         await Post.findByIdAndUpdate(postId, { $inc: { likeCount: -1 } }, { session });
 
-        await session.commitTransaction();
+        await commitTransactionSafely(session);
 
         const updatedPost = await Post.findById(postId);
 
         res.status(200).json(updatedPost);
     } catch (error: any) {
-        await session.abortTransaction();
+        await abortTransactionSafely(session);
 
         console.error({ message: 'Failed to unlike post', error, additionalData: { postId, userId } });
 

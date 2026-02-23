@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import Comment from '../models/Comment';
 import CommentVote from '../models/CommentVote';
 import { AuthRequest } from '../middleware/auth';
+import { abortTransactionSafely, commitTransactionSafely, startTransactionSafely } from '../utils/transaction';
 
 type CommentQuery = Record<string, any>;
 
@@ -193,13 +194,13 @@ const voteComment = async (req: AuthRequest, res: Response) => {
 
     const session = await mongoose.startSession();
 
-    session.startTransaction();
+    startTransactionSafely(session);
 
     try {
         const comment = await Comment.findById(commentId).session(session);
 
         if (!comment) {
-            await session.abortTransaction();
+            await abortTransactionSafely(session);
             res.status(404).json({message: 'Comment not found'});
             return;
         }
@@ -222,12 +223,12 @@ const voteComment = async (req: AuthRequest, res: Response) => {
             { session }
         );
 
-        await session.commitTransaction();
+        await commitTransactionSafely(session);
 
         const updatedComment = await Comment.findById(commentId).populate('author');
         res.status(200).json(updatedComment);
     } catch (error: any) {
-        await session.abortTransaction();
+        await abortTransactionSafely(session);
         console.error({
             message: 'Failed to vote on comment',
             error,
@@ -244,13 +245,13 @@ const removeCommentVote = async (req: AuthRequest, res: Response) => {
     const userId = req.user._id;
 
     const session = await mongoose.startSession();
-    session.startTransaction();
+    startTransactionSafely(session);
 
     try {
         const existing = await CommentVote.findOneAndDelete({ commentId, userId }).session(session);
 
         if (!existing) {
-            await session.abortTransaction();
+            await abortTransactionSafely(session);
             res.status(404).json({message: 'Vote not found'});
             return;
         }
@@ -261,12 +262,12 @@ const removeCommentVote = async (req: AuthRequest, res: Response) => {
 
         await Comment.findByIdAndUpdate(commentId, update, { session });
 
-        await session.commitTransaction();
+        await commitTransactionSafely(session);
 
         const updatedComment = await Comment.findById(commentId).populate('author');
         res.status(200).json(updatedComment);
     } catch (error: any) {
-        await session.abortTransaction();
+        await abortTransactionSafely(session);
         console.error({
             message: 'Failed to remove comment vote',
             error,

@@ -5,6 +5,7 @@ import mongoose from 'mongoose';
 import User from '../models/User';
 import Image from '../models/Image';
 import {createAuthTokens} from '../utils/jwt';
+import { abortTransactionSafely, commitTransactionSafely, startTransactionSafely } from '../utils/transaction';
 
 const createUser = async (req: Request, res: Response) => {
     const {username, email, password} = req.body;
@@ -16,7 +17,7 @@ const createUser = async (req: Request, res: Response) => {
 
     const session = await mongoose.startSession();
 
-    session.startTransaction();
+    startTransactionSafely(session);
 
     try {
         const salt = await bcrypt.genSalt(10);
@@ -51,13 +52,13 @@ const createUser = async (req: Request, res: Response) => {
 
         await savedUser.save({ session });
 
-        await session.commitTransaction();
+        await commitTransactionSafely(session);
 
         const userWithImage = await User.findById(savedUser._id);
 
         res.status(201).json(userWithImage);
     } catch (error: any) {
-        await session.abortTransaction();
+        await abortTransactionSafely(session);
 
         if (req.file) {
             fs.unlink(req.file.path, (err) => {
