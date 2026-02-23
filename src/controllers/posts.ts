@@ -5,6 +5,7 @@ import Like from '../models/Like';
 import { AuthRequest } from '../middleware/auth';
 import { MONGO_ERROR_CODES } from '../constants/mongo';
 import { abortTransactionSafely, commitTransactionSafely, startTransactionSafely } from '../utils/transaction';
+import searchService from '../services/search';
 
 type PostQuery = Record<string, any>;
 
@@ -245,6 +246,23 @@ const unlikePost = async (req: AuthRequest, res: Response) => {
     }
 };
 
+const searchPosts = async (req: AuthRequest, res: Response) => {
+    const query = req.query.query as string;
+
+    if (!query) {
+        res.status(400).json({ message: 'Query parameter is required' });
+        return;
+    }
+
+    try {
+        const posts = await searchService.searchPosts(query);
+        res.status(200).json(posts);
+    } catch (error: any) {
+        console.error({ message: 'Failed searching posts', error, additionalData: { query } });
+        res.status(500).json({ message: 'Failed searching posts' });
+    }
+};
+
 export default {
     getPosts,
     createPost,
@@ -252,5 +270,6 @@ export default {
     updatePost,
     deletePost,
     likePost,
-    unlikePost
+    unlikePost,
+    searchPosts
 };

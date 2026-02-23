@@ -66,6 +66,31 @@ router.get('/', postsController.getPosts);
 
 /**
  * @swagger
+ * /post/search:
+ *   get:
+ *     summary: Search posts using free text and natural language filters
+ *     tags: [Posts]
+ *     parameters:
+ *       - in: query
+ *         name: query
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Natural language search query (e.g., "posts about cats with more than 5 likes")
+ *     responses:
+ *       200:
+ *         description: List of search results
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Post'
+ */
+router.get('/search', postsController.searchPosts);
+
+/**
+ * @swagger
  * /post/{id}:
  *   get:
  *     summary: Get a post by ID

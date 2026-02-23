@@ -1,6 +1,7 @@
 import express from 'express';
 import usersController from '../controllers/users';
 import { upload } from '../utils/multer';
+import authMiddleware from '../middleware/auth';
 
 const router = express.Router();
 
@@ -51,6 +52,8 @@ const router = express.Router();
  *         description: User already exists
  */
 router.post('/', upload.single('image'), usersController.createUser);
+
+router.use(authMiddleware);
 
 /**
  * @swagger

@@ -4,9 +4,9 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "start": "NODE_ENV=production tsc && node ./dist/src/server.js",
-    "dev": "NODE_ENV=development nodemon ./src/server.ts",
-    "test": "NODE_ENV=test tsc && jest --runInBand --detectOpenHandles --coverage --forceExit"
+    "start": "tsc && cross-env NODE_ENV=production node ./dist/src/server.js",
+    "dev": "nodemon ./src/server.ts --ext ts,js,json --watch .env",
+    "test": "tsc && cross-env NODE_ENV=test jest --runInBand --detectOpenHandles --coverage --forceExit"
   },
   "author": "",
   "license": "ISC",
@@ -34,6 +34,7 @@
     "@types/swagger-ui-express": "^4.1.8",
     "@typescript-eslint/eslint-plugin": "^8.48.1",
     "@typescript-eslint/parser": "^8.48.1",
+    "cross-env": "^10.1.0",
     "eslint": "^9.39.1",
     "jest": "^30.2.0",
     "jest-environment-jsdom": "^30.2.0",

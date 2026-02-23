@@ -40,7 +40,8 @@ afterAll(async () => {
 
 describe('Posts API', () => {
     test('GET /post should return empty results with pagination initially', async () => {
-        const response = await request(app).get('/post');
+        const response = await request(app).get('/post')
+            .set('Authorization', 'Bearer ' + accessToken);
         expect(response.status).toBe(200);
         expect(response.body.posts).toEqual([]);
         expect(response.body.pagination.hasMore).toBe(false);
@@ -65,7 +66,8 @@ describe('Posts API', () => {
     });
 
     test('GET /post should return all posts with pagination', async () => {
-        const response = await request(app).get('/post');
+        const response = await request(app).get('/post')
+            .set('Authorization', 'Bearer ' + accessToken);
         expect(response.status).toBe(200);
         expect(response.body.posts.length).toBe(1);
         expect(response.body.posts[0].message).toBe('Test Message');
@@ -75,7 +77,8 @@ describe('Posts API', () => {
     });
 
     test('GET /post/:id should return a post by id', async () => {
-        const response = await request(app).get(`/post/${postId}`);
+        const response = await request(app).get(`/post/${postId}`)
+            .set('Authorization', 'Bearer ' + accessToken);
         expect(response.status).toBe(200);
         expect(response.body.message).toBe('Test Message');
         expect(response.body.author._id).toBe(userId);
@@ -83,12 +86,14 @@ describe('Posts API', () => {
 
     test('GET /post/:id should return 404 for non-existent id', async () => {
         const fakeId = new mongoose.Types.ObjectId();
-        const response = await request(app).get(`/post/${fakeId}`);
+        const response = await request(app).get(`/post/${fakeId}`)
+            .set('Authorization', 'Bearer ' + accessToken);
         expect(response.status).toBe(404);
     });
 
     test('GET /post?author=ID should return posts by author', async () => {
-        const response = await request(app).get(`/post?author=${userId}`);
+        const response = await request(app).get(`/post?author=${userId}`)
+            .set('Authorization', 'Bearer ' + accessToken);
         expect(response.status).toBe(200);
         expect(response.body.posts.length).toBe(1);
         expect(response.body.posts[0].author._id).toBe(userId);
@@ -102,13 +107,15 @@ describe('Posts API', () => {
             .set('Authorization', 'Bearer ' + accessToken)
             .send({ message: 'Post 3' });
 
-        const firstPage = await request(app).get('/post?limit=2');
+        const firstPage = await request(app).get('/post?limit=2')
+            .set('Authorization', 'Bearer ' + accessToken);
         expect(firstPage.status).toBe(200);
         expect(firstPage.body.posts.length).toBe(2);
         expect(firstPage.body.pagination.hasMore).toBe(true);
         expect(firstPage.body.pagination.nextCursor).toBeDefined();
 
-        const secondPage = await request(app).get(`/post?limit=2&cursor=${firstPage.body.pagination.nextCursor}`);
+        const secondPage = await request(app).get(`/post?limit=2&cursor=${firstPage.body.pagination.nextCursor}`)
+            .set('Authorization', 'Bearer ' + accessToken);
         expect(secondPage.status).toBe(200);
         expect(secondPage.body.posts.length).toBe(1);
         expect(secondPage.body.pagination.hasMore).toBe(false);
@@ -145,7 +152,8 @@ describe('Posts API', () => {
     });
 
     test('GET /post/:id should return 404 after delete', async () => {
-        const response = await request(app).get(`/post/${postId}`);
+        const response = await request(app).get(`/post/${postId}`)
+            .set('Authorization', 'Bearer ' + accessToken);
         expect(response.status).toBe(404);
     });
 });

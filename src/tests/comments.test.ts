@@ -82,7 +82,8 @@ describe('Comments API', () => {
 
     describe('GET /comment', () => {
         test('should get all comments with cursor pagination', async () => {
-            const response = await request(app).get('/comment');
+            const response = await request(app).get('/comment')
+                .set('Authorization', `Bearer ${accessToken}`);
             expect(response.status).toBe(200);
             expect(response.body).toHaveProperty('comments');
             expect(response.body).toHaveProperty('pagination');
@@ -94,20 +95,23 @@ describe('Comments API', () => {
         });
 
         test('should filter comments by postId', async () => {
-            const response = await request(app).get(`/comment?postId=${postId}`);
+            const response = await request(app).get(`/comment?postId=${postId}`)
+                .set('Authorization', `Bearer ${accessToken}`);
             expect(response.status).toBe(200);
             expect(response.body.comments[0].postId).toBe(postId);
         });
 
         test('should paginate comments with cursor', async () => {
-            const firstResponse = await request(app).get('/comment?limit=1');
+            const firstResponse = await request(app).get('/comment?limit=1')
+                .set('Authorization', `Bearer ${accessToken}`);
             expect(firstResponse.status).toBe(200);
             expect(firstResponse.body.comments.length).toBeLessThanOrEqual(1);
             expect(firstResponse.body.pagination.limit).toBe(1);
 
             if (firstResponse.body.pagination.hasMore) {
                 const cursor = firstResponse.body.pagination.nextCursor;
-                const secondResponse = await request(app).get(`/comment?cursor=${cursor}&limit=1`);
+                const secondResponse = await request(app).get(`/comment?cursor=${cursor}&limit=1`)
+                    .set('Authorization', `Bearer ${accessToken}`);
                 expect(secondResponse.status).toBe(200);
                 expect(secondResponse.body.comments[0]._id).not.toBe(firstResponse.body.comments[0]._id);
             }
@@ -123,13 +127,15 @@ describe('Comments API', () => {
         });
 
         test('should get comment by id', async () => {
-            const response = await request(app).get(`/comment/${commentId}`);
+            const response = await request(app).get(`/comment/${commentId}`)
+                .set('Authorization', `Bearer ${accessToken}`);
             expect(response.status).toBe(200);
             expect(response.body._id).toBe(commentId);
         });
 
         test('should return 404 for non-existent comment', async () => {
-            const response = await request(app).get('/comment/65e1d510e1b6f1234567890a');
+            const response = await request(app).get('/comment/65e1d510e1b6f1234567890a')
+                .set('Authorization', `Bearer ${accessToken}`);
             expect(response.status).toBe(404);
         });
     });
