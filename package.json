@@ -4,8 +4,8 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "start": "tsc && cross-env NODE_ENV=production node ./dist/src/server.js",
-    "dev": "nodemon ./src/server.ts --ext ts,js,json --watch .env",
+    "start": "tsc && node ./dist/src/server.js",
+    "dev": "cross-env NODE_ENV=dev nodemon ./src/server.ts --ext ts,js,json --watch .env",
     "test": "tsc && cross-env NODE_ENV=test jest --runInBand --detectOpenHandles --coverage --forceExit"
   },
   "author": "",
