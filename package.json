@@ -7,7 +7,7 @@
     "start": "tsc && node ./dist/src/server.js",
     "dev": "cross-env NODE_ENV=dev nodemon ./src/server.ts --ext ts,js,json --watch .env",
     "test": "tsc && cross-env NODE_ENV=test jest --runInBand --detectOpenHandles --coverage --forceExit",
-    "prod": "cp .envprod .env && tsc -p tsconfig_prod.json && pm2 restart ecosystem.config.js --env production",
+    "prod": "cp .env.prod .env && tsc -p tsconfig_prod.json && pm2 restart ecosystem.config.js --env production",
     "prod1": "cp .env.prod .env && tsc -p tsconfig.prod.json && node ./dist/src/server.js"
   },
   "author": "",
