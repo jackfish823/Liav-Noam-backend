@@ -6,7 +6,9 @@
   "scripts": {
     "start": "tsc && node ./dist/src/server.js",
     "dev": "cross-env NODE_ENV=dev nodemon ./src/server.ts --ext ts,js,json --watch .env",
-    "test": "tsc && cross-env NODE_ENV=test jest --runInBand --detectOpenHandles --coverage --forceExit"
+    "test": "tsc && cross-env NODE_ENV=test jest --runInBand --detectOpenHandles --coverage --forceExit",
+    "prod": "tsc -p tsconfig.prod.json && node ./dist/src/server.js",
+    "prod1": "cp .env.prod .env && tsc -p tsconfig.prod.json && node ./dist/src/server.js"
   },
   "author": "",
   "license": "ISC",
