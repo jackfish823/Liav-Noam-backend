@@ -6,6 +6,7 @@ import userRoute from "./routes/users";
 import commentRoute from "./routes/comments";
 import authRoute from "./routes/auth";
 import imageRoute from "./routes/images";
+import healthRoute from "./routes/health";
 import { swaggerSetup } from "./swagger";
 import { loadEnvironmentConfig } from "./utils/env";
 import fs from "fs";
@@ -31,6 +32,7 @@ app.use("/post", postRoute);
 app.use("/user", userRoute);
 app.use("/comment", commentRoute);
 app.use("/image", imageRoute);
+app.use("/health", healthRoute);
 
 const initApp = () => {
     return new Promise<Express>((resolve, reject) => {
