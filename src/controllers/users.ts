@@ -7,6 +7,16 @@ import Image from '../models/Image';
 import {createAuthTokens} from '../utils/jwt';
 import { abortTransactionSafely, commitTransactionSafely, startTransactionSafely } from '../utils/transaction';
 
+const attachProfileImageUrl = (user: any) => {
+    const baseUrl = process.env.BASE_URL || '/api';
+    
+    if (user.profileImage && user.profileImage._id) {
+        user.profileImage.url = `${baseUrl}/image/${user.profileImage._id}`;
+    }
+    
+    return user;
+};
+
 const createUser = async (req: Request, res: Response) => {
     const {username, email, password} = req.body;
 
@@ -56,7 +66,7 @@ const createUser = async (req: Request, res: Response) => {
 
         const userWithImage = await User.findById(savedUser._id);
 
-        res.status(201).json(userWithImage);
+        res.status(201).json(attachProfileImageUrl(userWithImage?.toObject()));
     } catch (error: any) {
         await abortTransactionSafely(session);
 
@@ -75,8 +85,9 @@ const createUser = async (req: Request, res: Response) => {
 const getAllUsers = async (req: Request, res: Response) => {
     try {
         const users = await User.find();
+        const usersWithImages = users.map(user => attachProfileImageUrl(user.toObject()));
         
-        res.status(200).json(users);
+        res.status(200).json(usersWithImages);
     } catch (error: any) {
         res.status(500).json({message: error.message});
     }
@@ -90,7 +101,7 @@ const getUserById = async (req: Request, res: Response) => {
             return res.status(404).json({message: 'User not found'});
         }
 
-        res.status(200).json(user);
+        res.status(200).json(attachProfileImageUrl(user.toObject()));
     } catch (error: any) {
         res.status(500).json({message: error.message});
     }
@@ -122,7 +133,7 @@ const updateUser = async (req: Request, res: Response) => {
             return res.status(404).json({message: 'User not found'});
         }
 
-        res.status(200).json(updatedUser);
+        res.status(200).json(attachProfileImageUrl(updatedUser.toObject()));
     } catch (error: any) {
         res.status(500).json({message: error.message});
     }

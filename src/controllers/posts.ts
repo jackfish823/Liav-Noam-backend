@@ -9,6 +9,20 @@ import searchService from '../services/search';
 
 type PostQuery = Record<string, any>;
 
+const attachImageUrls = (post: any) => {
+    const baseUrl = process.env.BASE_URL || '/api';
+    
+    if (post.image && post.image._id) {
+        post.image.url = `${baseUrl}/image/${post.image._id}`;
+    }
+    
+    if (post.author && post.author.profileImage && post.author.profileImage._id) {
+        post.author.profileImage.url = `${baseUrl}/image/${post.author.profileImage._id}`;
+    }
+    
+    return post;
+};
+
 const getPosts = async (req: AuthRequest, res: Response) => {
     const query: PostQuery = {};
 
@@ -45,8 +59,8 @@ const getPosts = async (req: AuthRequest, res: Response) => {
         const postsWithLiked = results.map((p) => {
             const obj = p.toObject ? p.toObject() : { ...p };
             (obj as Record<string, unknown>).isLiked = likedPostIds.has(p._id.toString());
-
-            return obj;
+            
+            return attachImageUrls(obj);
         });
 
         res.status(200).json({
@@ -90,7 +104,7 @@ const createPost = async (req: AuthRequest, res: Response) => {
         const savedPost = await Post.create(postData);
         const postWithPopulatedData = await Post.findById(savedPost._id);
 
-        res.status(201).json(postWithPopulatedData);
+        res.status(201).json(attachImageUrls(postWithPopulatedData?.toObject()));
     } catch (error: any) {
         res.status(409).json({message: error.message});
     }
@@ -115,7 +129,7 @@ const getPostById = async (req: AuthRequest, res: Response) => {
         const obj = post.toObject ? post.toObject() : { ...post };
         (obj as Record<string, unknown>).isLiked = isLiked;
 
-        res.status(200).json(obj);
+        res.status(200).json(attachImageUrls(obj));
     } catch (error: any) {
         res.status(500).json({message: error.message});
     }
@@ -256,7 +270,23 @@ const searchPosts = async (req: AuthRequest, res: Response) => {
 
     try {
         const posts = await searchService.searchPosts(query);
-        res.status(200).json(posts);
+        
+        let likedPostIds = new Set<string>();
+
+        if (req.user?._id && posts.length > 0) {
+            const postIds = posts.map((p: any) => p._id);
+            const likes = await Like.find({ userId: req.user._id, postId: { $in: postIds } }).select('postId');
+            likedPostIds = new Set(likes.map((l) => l.postId.toString()));
+        }
+
+        const postsWithLiked = posts.map((p: any) => {
+            const obj = p.toObject ? p.toObject() : { ...p };
+            (obj as Record<string, unknown>).isLiked = likedPostIds.has(p._id.toString());
+            
+            return attachImageUrls(obj);
+        });
+
+        res.status(200).json(postsWithLiked);
     } catch (error: any) {
         console.error({ message: 'Failed searching posts', error, additionalData: { query } });
         res.status(500).json({ message: 'Failed searching posts' });

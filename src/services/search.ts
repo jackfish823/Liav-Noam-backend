@@ -62,6 +62,22 @@ class SearchService {
         });
         pipeline.push({ $unwind: '$author' });
 
+        // Populate author's profile image
+        pipeline.push({
+            $lookup: {
+                from: 'images',
+                localField: 'author.profileImage',
+                foreignField: '_id',
+                as: 'author.profileImage'
+            }
+        });
+        pipeline.push({
+            $unwind: {
+                path: '$author.profileImage',
+                preserveNullAndEmptyArrays: true
+            }
+        });
+
         pipeline.push({
             $lookup: {
                 from: 'images',
