@@ -12,7 +12,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /auth/login:
+ * /api/auth/login:
  *   post:
  *     summary: Login a user
  *     tags: [Auth]
@@ -39,7 +39,7 @@ router.post('/login', authController.login);
 
 /**
  * @swagger
- * /auth/logout:
+ * /api/auth/logout:
  *   post:
  *     summary: Logout a user
  *     tags: [Auth]
@@ -64,7 +64,7 @@ router.post('/logout', authController.logout);
 
 /**
  * @swagger
- * /auth/refresh:
+ * /api/auth/refresh:
  *   post:
  *     summary: Refresh authentication tokens
  *     tags: [Auth]
@@ -89,7 +89,7 @@ router.post('/refresh', authController.refresh);
 
 /**
  * @swagger
- * /auth/google:
+ * /api/auth/google:
  *   post:
  *     summary: Authenticate with Google OAuth
  *     tags: [Auth]

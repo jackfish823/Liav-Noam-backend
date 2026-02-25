@@ -14,7 +14,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /image/{id}:
+ * /api/image/{id}:
  *   get:
  *     summary: Get image by ID
  *     tags: [Images]
@@ -41,7 +41,7 @@ router.use(authMiddleware);
 
 /**
  * @swagger
- * /image:
+ * /api/image:
  *   post:
  *     summary: Upload a new image
  *     tags: [Images]
@@ -74,7 +74,7 @@ router.post('/', upload.single('image'), imagesController.uploadImage);
 
 /**
  * @swagger
- * /image/{id}:
+ * /api/image/{id}:
  *   delete:
  *     summary: Delete an image
  *     tags: [Images]

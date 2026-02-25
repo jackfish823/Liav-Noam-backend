@@ -14,7 +14,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /user:
+ * /api/user:
  *   post:
  *     summary: Create a new user (register)
  *     tags: [Users]
@@ -57,7 +57,7 @@ router.use(authMiddleware);
 
 /**
  * @swagger
- * /user:
+ * /api/user:
  *   get:
  *     summary: Get all users
  *     tags: [Users]
@@ -75,7 +75,7 @@ router.get('/', usersController.getAllUsers);
 
 /**
  * @swagger
- * /user/{id}:
+ * /api/user/{id}:
  *   get:
  *     summary: Get a user by ID
  *     tags: [Users]
@@ -99,7 +99,7 @@ router.get('/:id', usersController.getUserById);
 
 /**
  * @swagger
- * /user/{id}:
+ * /api/user/{id}:
  *   put:
  *     summary: Update a user
  *     tags: [Users]
@@ -133,7 +133,7 @@ router.put('/:id', usersController.updateUser);
 
 /**
  * @swagger
- * /user/{id}:
+ * /api/user/{id}:
  *   delete:
  *     summary: Delete a user
  *     tags: [Users]

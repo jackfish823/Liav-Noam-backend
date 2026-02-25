@@ -13,7 +13,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /comment:
+ * /api/comment:
  *   get:
  *     summary: Get all comments with cursor-based pagination
  *     tags: [Comments]
@@ -71,7 +71,7 @@ router.get('/', commentsController.getComments);
 
 /**
  * @swagger
- * /comment/{id}:
+ * /api/comment/{id}:
  *   get:
  *     summary: Get a comment by ID
  *     tags: [Comments]
@@ -95,7 +95,7 @@ router.get('/:id', commentsController.getCommentById);
 
 /**
  * @swagger
- * /comment:
+ * /api/comment:
  *   post:
  *     summary: Create a new comment
  *     tags: [Comments]
@@ -128,7 +128,7 @@ router.post('/', commentsController.createComment);
 
 /**
  * @swagger
- * /comment/{id}:
+ * /api/comment/{id}:
  *   put:
  *     summary: Update a comment
  *     tags: [Comments]
@@ -166,7 +166,7 @@ router.put('/:id', commentsController.updateComment);
 
 /**
  * @swagger
- * /comment/{id}:
+ * /api/comment/{id}:
  *   delete:
  *     summary: Delete a comment
  *     tags: [Comments]
@@ -190,7 +190,7 @@ router.delete('/:id', commentsController.deleteComment);
 
 /**
  * @swagger
- * /comment/{id}/vote:
+ * /api/comment/{id}/vote:
  *   post:
  *     summary: Upvote or downvote a comment
  *     tags: [Comments]
@@ -233,7 +233,7 @@ router.post('/:id/vote', commentsController.voteComment);
 
 /**
  * @swagger
- * /comment/{id}/vote:
+ * /api/comment/{id}/vote:
  *   delete:
  *     summary: Remove vote from a comment
  *     tags: [Comments]

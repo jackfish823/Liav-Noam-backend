@@ -13,7 +13,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /post:
+ * /api/post:
  *   get:
  *     summary: Get all posts with cursor-based pagination
  *     tags: [Posts]
@@ -66,7 +66,7 @@ router.get('/', postsController.getPosts);
 
 /**
  * @swagger
- * /post/search:
+ * /api/post/search:
  *   get:
  *     summary: Search posts using free text and natural language filters
  *     tags: [Posts]
@@ -91,7 +91,7 @@ router.get('/search', postsController.searchPosts);
 
 /**
  * @swagger
- * /post/{id}:
+ * /api/post/{id}:
  *   get:
  *     summary: Get a post by ID
  *     tags: [Posts]
@@ -115,7 +115,7 @@ router.get('/:id', postsController.getPostById);
 
 /**
  * @swagger
- * /post:
+ * /api/post:
  *   post:
  *     summary: Create a new post
  *     tags: [Posts]
@@ -151,7 +151,7 @@ router.post('/', postsController.createPost);
 
 /**
  * @swagger
- * /post/{id}:
+ * /api/post/{id}:
  *   put:
  *     summary: Update a post
  *     tags: [Posts]
@@ -191,7 +191,7 @@ router.put('/:id', postsController.updatePost);
 
 /**
  * @swagger
- * /post/{id}:
+ * /api/post/{id}:
  *   delete:
  *     summary: Delete a post
  *     tags: [Posts]
@@ -215,7 +215,7 @@ router.delete('/:id', postsController.deletePost);
 
 /**
  * @swagger
- * /post/{id}/like:
+ * /api/post/{id}/like:
  *   post:
  *     summary: Like a post
  *     tags: [Posts]
@@ -245,7 +245,7 @@ router.post('/:id/like', postsController.likePost);
 
 /**
  * @swagger
- * /post/{id}/like:
+ * /api/post/{id}/like:
  *   delete:
  *     summary: Remove like from a post
  *     tags: [Posts]

@@ -38,8 +38,8 @@ app.use("/api/health", healthRoute);
 const publicPath = path.join(__dirname, '../public');
 app.use(express.static(publicPath));
 
-// Catch-all route to serve index.html for React SPA
-app.get('*path', (req, res) => {
+// Catch-all route to serve index.html for React SPA or return 404 for API
+app.use((req, res) => {
     if (!req.path.startsWith('/api')) {
         res.sendFile(path.join(publicPath, 'index.html'));
     } else {
