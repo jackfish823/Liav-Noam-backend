@@ -5,6 +5,8 @@
     "sourceMap": false
   },
   "exclude": [
-    "src/tests/**/*.ts"
+    "src/tests/**/*.ts",
+    "public",
+    "node_modules"
   ]
 }
