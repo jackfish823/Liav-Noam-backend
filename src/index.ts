@@ -7,8 +7,8 @@ import commentRoute from "./routes/comments";
 import authRoute from "./routes/auth";
 import imageRoute from "./routes/images";
 import healthRoute from "./routes/health";
-import { swaggerSetup } from "./swagger";
-import { loadEnvironmentConfig } from "./utils/env";
+import {swaggerSetup} from "./swagger";
+import {loadEnvironmentConfig} from "./utils/env";
 import fs from "fs";
 import path from "path";
 
@@ -19,7 +19,7 @@ const app = express();
 const uploadsDir = path.join(__dirname, '../uploads');
 
 if (!fs.existsSync(uploadsDir)) {
-    fs.mkdirSync(uploadsDir, { recursive: true });
+    fs.mkdirSync(uploadsDir, {recursive: true});
 }
 
 app.use(cors());
@@ -35,7 +35,7 @@ app.use("/api/image", imageRoute);
 app.use("/api/health", healthRoute);
 
 // Serve static files from the 'public' directory
-const publicPath = path.join(__dirname, '../public');
+const publicPath = path.join(__dirname, '../../public');
 app.use(express.static(publicPath));
 
 // Catch-all route to serve index.html for React SPA or return 404 for API
@@ -43,7 +43,7 @@ app.use((req, res) => {
     if (!req.path.startsWith('/api')) {
         res.sendFile(path.join(publicPath, 'index.html'));
     } else {
-        res.status(404).json({ message: "API route not found" });
+        res.status(404).json({message: "API route not found"});
     }
 });
 
