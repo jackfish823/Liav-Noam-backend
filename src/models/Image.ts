@@ -45,7 +45,7 @@ const imageSchema = new Schema<IImage>({
 });
 
 imageSchema.virtual('url').get(function() {
-    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+    const baseUrl = process.env.BASE_URL || '/api';
 
     return `${baseUrl}/image/${this._id}`;
 });
