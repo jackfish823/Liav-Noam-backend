@@ -19,11 +19,11 @@ beforeAll(async () => {
     await User.deleteMany();
 
     // Register user
-    const response = await request(app).post('/user').send(initialUser);
+    const response = await request(app).post('/api/user').send(initialUser);
     userId = response.body._id;
 
     // Login to get access token
-    const loginResponse = await request(app).post('/auth/login').send({
+    const loginResponse = await request(app).post('/api/auth/login').send({
         email: initialUser.email,
         password: initialUser.password
     });
@@ -36,14 +36,14 @@ afterAll(async () => {
 
 describe('Users API', () => {
     test('GET /user should return array containing our test user initially', async () => {
-        const response = await request(app).get('/user')
+        const response = await request(app).get('/api/user')
             .set('Authorization', 'Bearer ' + accessToken);
         expect(response.status).toBe(200);
         expect(response.body.length).toBe(1);
     });
 
     test('POST /user should create a new user', async () => {
-        const response = await request(app).post('/user').send({
+        const response = await request(app).post('/api/user').send({
             username: 'testuser',
             email: 'test@test.com',
             password: 'password'
@@ -54,7 +54,7 @@ describe('Users API', () => {
     });
 
     test('POST /user should fail with duplicate email', async () => {
-        const response = await request(app).post('/user').send({
+        const response = await request(app).post('/api/user').send({
             username: 'testuser2',
             email: 'test@test.com', // Duplicate email
             password: 'password'
@@ -63,7 +63,7 @@ describe('Users API', () => {
     });
 
     test('POST /user should return 400 for missing required fields (email)', async () => {
-        const response = await request(app).post('/user').send({
+        const response = await request(app).post('/api/user').send({
             username: 'testuser3',
             // Missing email
         });
@@ -71,14 +71,14 @@ describe('Users API', () => {
     });
 
     test('GET /user should return all users', async () => {
-        const response = await request(app).get('/user')
+        const response = await request(app).get('/api/user')
             .set('Authorization', 'Bearer ' + accessToken);
         expect(response.status).toBe(200);
         expect(response.body.length).toBeGreaterThanOrEqual(1);
     });
 
     test('GET /user/:id should return a user by id', async () => {
-        const response = await request(app).get(`/user/${userId}`)
+        const response = await request(app).get(`/api/user/${userId}`)
             .set('Authorization', 'Bearer ' + accessToken);
         expect(response.status).toBe(200);
         expect(response.body.username).toBe('initialuser');
@@ -86,19 +86,19 @@ describe('Users API', () => {
 
     test('GET /user/:id should return 404 for non-existent id', async () => {
         const fakeId = new mongoose.Types.ObjectId();
-        const response = await request(app).get(`/user/${fakeId}`)
+        const response = await request(app).get(`/api/user/${fakeId}`)
             .set('Authorization', 'Bearer ' + accessToken);
         expect(response.status).toBe(404);
     });
 
     test('GET /user/:id should return 500 for invalid id format', async () => {
-        const response = await request(app).get(`/user/invalid-id`)
+        const response = await request(app).get(`/api/user/invalid-id`)
             .set('Authorization', 'Bearer ' + accessToken);
         expect(response.status).toBe(500);
     });
 
     test('PUT /user/:id should update a user', async () => {
-        const response = await request(app).put(`/user/${userId}`)
+        const response = await request(app).put(`/api/user/${userId}`)
             .set('Authorization', 'Bearer ' + accessToken)
             .send({
                 username: 'updateduser',
@@ -111,7 +111,7 @@ describe('Users API', () => {
 
     test('PUT /user/:id should return 404 for non-existent id', async () => {
         const fakeId = new mongoose.Types.ObjectId();
-        const response = await request(app).put(`/user/${fakeId}`)
+        const response = await request(app).put(`/api/user/${fakeId}`)
             .set('Authorization', 'Bearer ' + accessToken)
             .send({
                 username: 'updateduser',
@@ -121,7 +121,7 @@ describe('Users API', () => {
     });
 
     test('PUT /user/:id should return 500 for invalid id format', async () => {
-        const response = await request(app).put(`/user/invalid-id`)
+        const response = await request(app).put(`/api/user/invalid-id`)
             .set('Authorization', 'Bearer ' + accessToken)
             .send({
                 username: 'updateduser',
@@ -131,26 +131,26 @@ describe('Users API', () => {
     });
 
     test('DELETE /user/:id should delete a user', async () => {
-        const response = await request(app).delete(`/user/${userId}`)
+        const response = await request(app).delete(`/api/user/${userId}`)
             .set('Authorization', 'Bearer ' + accessToken);
         expect(response.status).toBe(200);
     });
 
     test('DELETE /user/:id should return 404 for non-existent id', async () => {
         const fakeId = new mongoose.Types.ObjectId();
-        const response = await request(app).delete(`/user/${fakeId}`)
+        const response = await request(app).delete(`/api/user/${fakeId}`)
             .set('Authorization', 'Bearer ' + accessToken);
         expect(response.status).toBe(404);
     });
 
     test('DELETE /user/:id should return 500 for invalid id format', async () => {
-        const response = await request(app).delete(`/user/invalid-id`)
+        const response = await request(app).delete(`/api/user/invalid-id`)
             .set('Authorization', 'Bearer ' + accessToken);
         expect(response.status).toBe(500);
     });
 
     test('GET /user/:id should return 404 after delete', async () => {
-        const response = await request(app).get(`/user/${userId}`)
+        const response = await request(app).get(`/api/user/${userId}`)
             .set('Authorization', 'Bearer ' + accessToken);
         expect(response.status).toBe(404);
     });

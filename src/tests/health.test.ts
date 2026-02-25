@@ -14,8 +14,8 @@ afterAll(async () => {
 });
 
 describe('Health Check API', () => {
-    test('GET /health should return 200 and status ok', async () => {
-        const response = await request(app).get('/health');
+    test('GET /api/health should return 200 and status ok', async () => {
+        const response = await request(app).get('/api/health');
         expect(response.status).toBe(200);
         expect(response.body).toHaveProperty('status', 'ok');
         expect(response.body).toHaveProperty('uptime');

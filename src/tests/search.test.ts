@@ -32,10 +32,10 @@ beforeAll(async () => {
     await Like.deleteMany();
 
     // Register and login user
-    const userRes = await request(app).post('/user').send(testUser);
+    const userRes = await request(app).post('/api/user').send(testUser);
     userId = userRes.body._id;
 
-    const loginRes = await request(app).post('/auth/login').send({
+    const loginRes = await request(app).post('/api/auth/login').send({
         email: testUser.email,
         password: testUser.password
     });
@@ -71,7 +71,7 @@ describe('Search API', () => {
         });
 
         const response = await request(app)
-            .get('/post/search?query=find posts about cats')
+            .get('/api/post/search?query=find posts about cats')
             .set('Authorization', `Bearer ${accessToken}`);
 
         expect(response.status).toBe(200);
@@ -86,7 +86,7 @@ describe('Search API', () => {
         });
 
         const response = await request(app)
-            .get('/post/search?query=popular posts')
+            .get('/api/post/search?query=popular posts')
             .set('Authorization', `Bearer ${accessToken}`);
 
         expect(response.status).toBe(200);
@@ -102,7 +102,7 @@ describe('Search API', () => {
         });
 
         const response = await request(app)
-            .get('/post/search?query=posts with 2 comments')
+            .get('/api/post/search?query=posts with 2 comments')
             .set('Authorization', `Bearer ${accessToken}`);
 
         expect(response.status).toBe(200);
@@ -119,7 +119,7 @@ describe('Search API', () => {
         });
 
         const response = await request(app)
-            .get('/post/search?query=dogs with few likes')
+            .get('/api/post/search?query=dogs with few likes')
             .set('Authorization', `Bearer ${accessToken}`);
 
         expect(response.status).toBe(200);
@@ -130,7 +130,7 @@ describe('Search API', () => {
 
     test('GET /post/search should return 400 if query is missing', async () => {
         const response = await request(app)
-            .get('/post/search')
+            .get('/api/post/search')
             .set('Authorization', `Bearer ${accessToken}`);
 
         expect(response.status).toBe(400);
@@ -142,7 +142,7 @@ describe('Search API', () => {
         });
 
         const response = await request(app)
-            .get('/post/search?query=something')
+            .get('/api/post/search?query=something')
             .set('Authorization', `Bearer ${accessToken}`);
 
         expect(response.status).toBe(200);
@@ -153,7 +153,7 @@ describe('Search API', () => {
         (llmService.parseSearchQuery as jest.Mock).mockResolvedValue({});
 
         const response = await request(app)
-            .get('/post/search?query=all')
+            .get('/api/post/search?query=all')
             .set('Authorization', `Bearer ${accessToken}`);
 
         expect(response.status).toBe(200);

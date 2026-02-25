@@ -27,12 +27,25 @@ app.use(express.json());
 
 swaggerSetup(app);
 
-app.use("/auth", authRoute);
-app.use("/post", postRoute);
-app.use("/user", userRoute);
-app.use("/comment", commentRoute);
-app.use("/image", imageRoute);
-app.use("/health", healthRoute);
+app.use("/api/auth", authRoute);
+app.use("/api/post", postRoute);
+app.use("/api/user", userRoute);
+app.use("/api/comment", commentRoute);
+app.use("/api/image", imageRoute);
+app.use("/api/health", healthRoute);
+
+// Serve static files from the 'public' directory
+const publicPath = path.join(__dirname, '../public');
+app.use(express.static(publicPath));
+
+// Catch-all route to serve index.html for React SPA
+app.get('*path', (req, res) => {
+    if (!req.path.startsWith('/api')) {
+        res.sendFile(path.join(publicPath, 'index.html'));
+    } else {
+        res.status(404).json({ message: "API route not found" });
+    }
+});
 
 const initApp = () => {
     return new Promise<Express>((resolve, reject) => {
