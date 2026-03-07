@@ -27,7 +27,12 @@ class SearchService {
         const matchStage: any = {};
 
         if (parsedQuery.message) {
-            matchStage.message = { $regex: parsedQuery.message, $options: 'i' };
+            const keywords = Array.isArray(parsedQuery.message) ? parsedQuery.message : [parsedQuery.message];
+            if (keywords.length > 0) {
+                matchStage.$or = keywords.map((keyword: string) => ({
+                    message: { $regex: keyword, $options: 'i' }
+                }));
+            }
         }
 
         if (parsedQuery.likeCount) {

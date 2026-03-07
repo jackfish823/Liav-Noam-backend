@@ -1,5 +1,5 @@
 export interface LlmSearchQuery {
-    message?: string;
+    message?: string[];
     likeCount?: { $gte?: number; $lte?: number; $eq?: number };
     createdAt?: { $gte?: string; $lte?: string };
     commentsCount?: { $gte?: number; $lte?: number; $eq?: number };
@@ -28,6 +28,7 @@ class LlmService {
             - commentsCount: number (number of comments)
 
             Translate the following user query into a JSON object with these optional keys: "message", "likeCount", "createdAt", "commentsCount".
+            For "message", use an array of keywords found in the query.
             For numeric fields (likeCount, commentsCount), use MongoDB-style operators: $gte, $lte, $eq.
             For date fields (createdAt), use ISO strings and $gte, $lte operators.
             Assume "today" is ${new Date().toISOString()}.
@@ -35,7 +36,7 @@ class LlmService {
             Example queries:
             - "posts with more than 10 likes" -> {"likeCount": {"$gt": 10}}
             - "recent posts from last week" -> {"createdAt": {"$gte": "${new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()}"}}
-            - "posts about sports with 5 comments" -> {"message": "sports", "commentsCount": {"$eq": 5}}
+            - "posts about sports and football with 5 comments" -> {"message": ["sports", "football"], "commentsCount": {"$eq": 5}}
 
             User Query: "${userQuery}"
             Respond ONLY with the JSON object.

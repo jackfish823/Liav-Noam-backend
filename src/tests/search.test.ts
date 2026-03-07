@@ -65,9 +65,9 @@ describe('Search API', () => {
         jest.clearAllMocks();
     });
 
-    test('GET /post/search should return posts filtered by message', async () => {
+    test('GET /post/search should return posts filtered by message keywords', async () => {
         (llmService.parseSearchQuery as jest.Mock).mockResolvedValue({
-            message: 'cat'
+            message: ['cat']
         });
 
         const response = await request(app)
@@ -78,6 +78,23 @@ describe('Search API', () => {
         expect(Array.isArray(response.body)).toBe(true);
         expect(response.body.length).toBe(1);
         expect(response.body[0].message).toContain('Cats');
+    });
+
+    test('GET /post/search should return posts filtered by multiple message keywords', async () => {
+        (llmService.parseSearchQuery as jest.Mock).mockResolvedValue({
+            message: ['cat', 'dog']
+        });
+
+        const response = await request(app)
+            .get('/api/post/search?query=find posts about cats or dogs')
+            .set('Authorization', `Bearer ${accessToken}`);
+
+        expect(response.status).toBe(200);
+        expect(Array.isArray(response.body)).toBe(true);
+        expect(response.body.length).toBe(2); // post2 (Cats) and post3 (Dogs)
+        const messages = response.body.map((p: any) => p.message);
+        expect(messages).toContain('Cats are great');
+        expect(messages).toContain('Dogs are better');
     });
 
     test('GET /post/search should return posts filtered by likeCount', async () => {
