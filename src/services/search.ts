@@ -28,8 +28,11 @@ class SearchService {
 
         if (parsedQuery.message) {
             const keywords = Array.isArray(parsedQuery.message) ? parsedQuery.message : [parsedQuery.message];
-            if (keywords.length > 0) {
-                matchStage.$or = keywords.map((keyword: string) => ({
+            // Ensure all keywords are strings to prevent "$regex has to be a string" error
+            const validKeywords = keywords.filter(k => typeof k === 'string' && k.length > 0);
+            
+            if (validKeywords.length > 0) {
+                matchStage.$or = validKeywords.map((keyword: string) => ({
                     message: { $regex: keyword, $options: 'i' }
                 }));
             }
