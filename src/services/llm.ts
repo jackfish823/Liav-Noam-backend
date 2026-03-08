@@ -28,7 +28,7 @@ class LlmService {
             - commentsCount: number (number of comments)
 
             Translate the following user query into a JSON object with these optional keys: "message", "likeCount", "createdAt", "commentsCount".
-            For "message", use an array of keywords found in the query. Additionally, include contextually related synonyms or related terms to enrich the search results (e.g., if searching for "technology", also include "tech", "software", "gadget").
+            For "message", use an array of keywords found in the query. For every keyword, include both its singular and plural forms (e.g., "cat" and "cats"). Additionally, include contextually related synonyms or related terms to enrich the search results (e.g., if searching for "technology", also include "tech", "software", "gadget").
             For numeric fields (likeCount, commentsCount), use MongoDB-style operators: $gte, $lte, $eq.
             For date fields (createdAt), use ISO strings and $gte, $lte operators.
             Assume "today" is ${new Date().toISOString()}.
