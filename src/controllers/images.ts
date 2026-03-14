@@ -1,5 +1,5 @@
-import { Response } from 'express';
-import { AuthRequest } from '../middleware/auth';
+import {Response} from 'express';
+import {AuthRequest} from '../middleware/auth';
 import Image from '../models/Image';
 import fs from 'fs';
 import path from 'path';
@@ -24,7 +24,7 @@ export const uploadImage = async (req: AuthRequest, res: Response) => {
         const image = new Image(imageData);
         await image.save();
 
-        const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+        const baseUrl = process.env.BASE_URL || '/api';
 
         const response = {
             id: image._id,

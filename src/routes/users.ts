@@ -1,6 +1,7 @@
 import express from 'express';
 import usersController from '../controllers/users';
 import { upload } from '../utils/multer';
+import authMiddleware from '../middleware/auth';
 
 const router = express.Router();
 
@@ -13,7 +14,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /user:
+ * /api/user:
  *   post:
  *     summary: Create a new user (register)
  *     tags: [Users]
@@ -52,9 +53,11 @@ const router = express.Router();
  */
 router.post('/', upload.single('image'), usersController.createUser);
 
+router.use(authMiddleware);
+
 /**
  * @swagger
- * /user:
+ * /api/user:
  *   get:
  *     summary: Get all users
  *     tags: [Users]
@@ -72,7 +75,7 @@ router.get('/', usersController.getAllUsers);
 
 /**
  * @swagger
- * /user/{id}:
+ * /api/user/{id}:
  *   get:
  *     summary: Get a user by ID
  *     tags: [Users]
@@ -96,7 +99,7 @@ router.get('/:id', usersController.getUserById);
 
 /**
  * @swagger
- * /user/{id}:
+ * /api/user/{id}:
  *   put:
  *     summary: Update a user
  *     tags: [Users]
@@ -130,7 +133,7 @@ router.put('/:id', usersController.updateUser);
 
 /**
  * @swagger
- * /user/{id}:
+ * /api/user/{id}:
  *   delete:
  *     summary: Delete a user
  *     tags: [Users]

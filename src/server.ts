@@ -1,9 +1,19 @@
 import initApp from "./index";
+import https from "https";
+import http from "http";
+import fs from "fs";
 
-const port = process.env.PORT;
 
 initApp().then((app) => {
-    app.listen(port, () => {
-        console.log(`Example app listening at http://localhost:${port}`);
-    });
+    if (process.env.NODE_ENV !== "production") {
+        console.log('development');
+        http.createServer(app).listen(process.env.PORT);
+    } else {
+        console.log('PRODUCTION');
+        const options = {
+            key: fs.readFileSync("../client-key.pem"),
+            cert: fs.readFileSync("../client-cert.pem"),
+        }
+        https.createServer(options, app).listen(process.env.HTTPS_PORT);
+    }
 });

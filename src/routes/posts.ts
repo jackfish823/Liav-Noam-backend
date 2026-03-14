@@ -13,7 +13,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /post:
+ * /api/post:
  *   get:
  *     summary: Get all posts with cursor-based pagination
  *     tags: [Posts]
@@ -66,7 +66,32 @@ router.get('/', postsController.getPosts);
 
 /**
  * @swagger
- * /post/{id}:
+ * /api/post/search:
+ *   get:
+ *     summary: Search posts using free text and natural language filters
+ *     tags: [Posts]
+ *     parameters:
+ *       - in: query
+ *         name: query
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Natural language search query (e.g., "posts about cats with more than 5 likes")
+ *     responses:
+ *       200:
+ *         description: List of search results
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Post'
+ */
+router.get('/search', postsController.searchPosts);
+
+/**
+ * @swagger
+ * /api/post/{id}:
  *   get:
  *     summary: Get a post by ID
  *     tags: [Posts]
@@ -90,7 +115,7 @@ router.get('/:id', postsController.getPostById);
 
 /**
  * @swagger
- * /post:
+ * /api/post:
  *   post:
  *     summary: Create a new post
  *     tags: [Posts]
@@ -126,7 +151,7 @@ router.post('/', postsController.createPost);
 
 /**
  * @swagger
- * /post/{id}:
+ * /api/post/{id}:
  *   put:
  *     summary: Update a post
  *     tags: [Posts]
@@ -166,7 +191,7 @@ router.put('/:id', postsController.updatePost);
 
 /**
  * @swagger
- * /post/{id}:
+ * /api/post/{id}:
  *   delete:
  *     summary: Delete a post
  *     tags: [Posts]
@@ -190,7 +215,7 @@ router.delete('/:id', postsController.deletePost);
 
 /**
  * @swagger
- * /post/{id}/like:
+ * /api/post/{id}/like:
  *   post:
  *     summary: Like a post
  *     tags: [Posts]
@@ -220,7 +245,7 @@ router.post('/:id/like', postsController.likePost);
 
 /**
  * @swagger
- * /post/{id}/like:
+ * /api/post/{id}/like:
  *   delete:
  *     summary: Remove like from a post
  *     tags: [Posts]

@@ -4,8 +4,24 @@ import Post from '../models/Post';
 import Like from '../models/Like';
 import { AuthRequest } from '../middleware/auth';
 import { MONGO_ERROR_CODES } from '../constants/mongo';
+import { abortTransactionSafely, commitTransactionSafely, startTransactionSafely } from '../utils/transaction';
+import searchService from '../services/search';
 
 type PostQuery = Record<string, any>;
+
+const attachImageUrls = (post: any) => {
+    const baseUrl = process.env.BASE_URL || '/api';
+    
+    if (post.image && post.image._id) {
+        post.image.url = `${baseUrl}/image/${post.image._id}`;
+    }
+    
+    if (post.author && post.author.profileImage && post.author.profileImage._id) {
+        post.author.profileImage.url = `${baseUrl}/image/${post.author.profileImage._id}`;
+    }
+    
+    return post;
+};
 
 const getPosts = async (req: AuthRequest, res: Response) => {
     const query: PostQuery = {};
@@ -43,8 +59,8 @@ const getPosts = async (req: AuthRequest, res: Response) => {
         const postsWithLiked = results.map((p) => {
             const obj = p.toObject ? p.toObject() : { ...p };
             (obj as Record<string, unknown>).isLiked = likedPostIds.has(p._id.toString());
-
-            return obj;
+            
+            return attachImageUrls(obj);
         });
 
         res.status(200).json({
@@ -88,7 +104,7 @@ const createPost = async (req: AuthRequest, res: Response) => {
         const savedPost = await Post.create(postData);
         const postWithPopulatedData = await Post.findById(savedPost._id);
 
-        res.status(201).json(postWithPopulatedData);
+        res.status(201).json(attachImageUrls(postWithPopulatedData?.toObject()));
     } catch (error: any) {
         res.status(409).json({message: error.message});
     }
@@ -113,7 +129,7 @@ const getPostById = async (req: AuthRequest, res: Response) => {
         const obj = post.toObject ? post.toObject() : { ...post };
         (obj as Record<string, unknown>).isLiked = isLiked;
 
-        res.status(200).json(obj);
+        res.status(200).json(attachImageUrls(obj));
     } catch (error: any) {
         res.status(500).json({message: error.message});
     }
@@ -171,13 +187,13 @@ const likePost = async (req: AuthRequest, res: Response) => {
 
     const session = await mongoose.startSession();
 
-    session.startTransaction();
+    startTransactionSafely(session);
 
     try {
         const post = await Post.findById(postId).session(session);
 
         if (!post) {
-            await session.abortTransaction();
+            await abortTransactionSafely(session);
 
             res.status(404).json({message: 'Post not found'});
 
@@ -187,13 +203,13 @@ const likePost = async (req: AuthRequest, res: Response) => {
         await Like.create([{ postId, userId }], { session });
         await Post.findByIdAndUpdate(postId, { $inc: { likeCount: 1 } }, { session });
 
-        await session.commitTransaction();
+        await commitTransactionSafely(session);
 
         const updatedPost = await Post.findById(postId);
 
         res.status(201).json(updatedPost);
     } catch (error: any) {
-        await session.abortTransaction();
+        await abortTransactionSafely(session);
 
         if (error.code === MONGO_ERROR_CODES.DUPLICATE_KEY) {
             res.status(409).json({message: 'Post already liked'});
@@ -213,13 +229,13 @@ const unlikePost = async (req: AuthRequest, res: Response) => {
     const userId = req.user._id;
 
     const session = await mongoose.startSession();
-    session.startTransaction();
+    startTransactionSafely(session);
 
     try {
         const deleteResult = await Like.deleteOne({ postId, userId }).session(session);
 
         if (deleteResult.deletedCount === 0) {
-            await session.abortTransaction();
+            await abortTransactionSafely(session);
 
             res.status(404).json({message: 'Like not found'});
 
@@ -228,19 +244,52 @@ const unlikePost = async (req: AuthRequest, res: Response) => {
 
         await Post.findByIdAndUpdate(postId, { $inc: { likeCount: -1 } }, { session });
 
-        await session.commitTransaction();
+        await commitTransactionSafely(session);
 
         const updatedPost = await Post.findById(postId);
 
         res.status(200).json(updatedPost);
     } catch (error: any) {
-        await session.abortTransaction();
+        await abortTransactionSafely(session);
 
         console.error({ message: 'Failed to unlike post', error, additionalData: { postId, userId } });
 
         res.status(500).json({message: 'Failed to unlike post'});
     } finally {
         session.endSession();
+    }
+};
+
+const searchPosts = async (req: AuthRequest, res: Response) => {
+    const query = req.query.query as string;
+
+    if (!query) {
+        res.status(400).json({ message: 'Query parameter is required' });
+        return;
+    }
+
+    try {
+        const posts = await searchService.searchPosts(query);
+        
+        let likedPostIds = new Set<string>();
+
+        if (req.user?._id && posts.length > 0) {
+            const postIds = posts.map((p: any) => p._id);
+            const likes = await Like.find({ userId: req.user._id, postId: { $in: postIds } }).select('postId');
+            likedPostIds = new Set(likes.map((l) => l.postId.toString()));
+        }
+
+        const postsWithLiked = posts.map((p: any) => {
+            const obj = p.toObject ? p.toObject() : { ...p };
+            (obj as Record<string, unknown>).isLiked = likedPostIds.has(p._id.toString());
+            
+            return attachImageUrls(obj);
+        });
+
+        res.status(200).json(postsWithLiked);
+    } catch (error: any) {
+        console.error({ message: 'Failed searching posts', error, additionalData: { query } });
+        res.status(500).json({ message: 'Failed searching posts' });
     }
 };
 
@@ -251,5 +300,6 @@ export default {
     updatePost,
     deletePost,
     likePost,
-    unlikePost
+    unlikePost,
+    searchPosts
 };

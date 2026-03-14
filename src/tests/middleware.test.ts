@@ -4,7 +4,7 @@ import mongoose from 'mongoose';
 import {Express} from 'express';
 
 let app: Express;
-const PROTECTED_ROUTE = '/post';
+const PROTECTED_ROUTE = '/api/post';
 
 beforeAll(async () => {
     app = await initApp();

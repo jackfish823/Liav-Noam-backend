@@ -18,7 +18,7 @@ beforeAll(async () => {
     app = await initApp();
     await User.deleteMany();
 
-    const response = await request(app).post('/user').send(testUser);
+    const response = await request(app).post('/api/user').send(testUser);
 
     userId = response.body._id;
 });
@@ -32,7 +32,7 @@ describe('Auth API', () => {
 
     describe('POST /auth/login', () => {
         test('should login successfully with valid credentials', async () => {
-            const response = await request(app).post('/auth/login').send({
+            const response = await request(app).post('/api/auth/login').send({
                 email: testUser.email,
                 password: testUser.password
             });
@@ -44,21 +44,21 @@ describe('Auth API', () => {
         });
 
         test('should fail with 400 if email is missing', async () => {
-            const response = await request(app).post('/auth/login').send({
+            const response = await request(app).post('/api/auth/login').send({
                 password: testUser.password
             });
             expect(response.status).toBe(400);
         });
 
         test('should fail with 400 if password is missing', async () => {
-            const response = await request(app).post('/auth/login').send({
+            const response = await request(app).post('/api/auth/login').send({
                 email: testUser.email
             });
             expect(response.status).toBe(400);
         });
 
         test('should fail with 401 if user does not exist', async () => {
-            const response = await request(app).post('/auth/login').send({
+            const response = await request(app).post('/api/auth/login').send({
                 email: 'wrong@email.com',
                 password: 'somepassword'
             });
@@ -66,7 +66,7 @@ describe('Auth API', () => {
         });
 
         test('should fail with 401 if password is incorrect', async () => {
-            const response = await request(app).post('/auth/login').send({
+            const response = await request(app).post('/api/auth/login').send({
                 email: testUser.email,
                 password: 'wrongpassword'
             });
@@ -76,7 +76,7 @@ describe('Auth API', () => {
 
     describe('POST /auth/refresh', () => {
         test('should return new tokens with valid refresh token', async () => {
-            const response = await request(app).post('/auth/refresh').send({
+            const response = await request(app).post('/api/auth/refresh').send({
                 refreshToken
             });
             expect(response.status).toBe(200);
@@ -89,12 +89,12 @@ describe('Auth API', () => {
         });
 
         test('should fail with 400 if refresh token is missing', async () => {
-            const response = await request(app).post('/auth/refresh').send({});
+            const response = await request(app).post('/api/auth/refresh').send({});
             expect(response.status).toBe(400);
         });
 
         test('should fail with 403 if refresh token is invalid', async () => {
-            const response = await request(app).post('/auth/refresh').send({
+            const response = await request(app).post('/api/auth/refresh').send({
                 refreshToken: 'invalid_token'
             });
             expect(response.status).toBe(403);
@@ -105,20 +105,20 @@ describe('Auth API', () => {
             // We already rotated the token in the first test, but let's do it explicitly here to be sure
             
             // 1. Get a fresh valid pair
-            const loginRes = await request(app).post('/auth/login').send({
+            const loginRes = await request(app).post('/api/auth/login').send({
                 email: testUser.email,
                 password: testUser.password
             });
             const freshRefreshToken = loginRes.body.refreshToken;
 
             // 2. Use it once (valid)
-            const refreshRes1 = await request(app).post('/auth/refresh').send({
+            const refreshRes1 = await request(app).post('/api/auth/refresh').send({
                 refreshToken: freshRefreshToken
             });
             expect(refreshRes1.status).toBe(200);
 
             // 3. Try to use the SAME token again (reuse)
-            const refreshRes2 = await request(app).post('/auth/refresh').send({
+            const refreshRes2 = await request(app).post('/api/auth/refresh').send({
                 refreshToken: freshRefreshToken
             });
             expect(refreshRes2.status).toBe(403);
@@ -129,7 +129,7 @@ describe('Auth API', () => {
         let validRefreshToken: string;
 
         beforeEach(async () => {
-            const loginRes = await request(app).post('/auth/login').send({
+            const loginRes = await request(app).post('/api/auth/login').send({
                 email: testUser.email,
                 password: testUser.password
             });
@@ -137,25 +137,25 @@ describe('Auth API', () => {
         });
 
         test('should logout successfully with valid refresh token', async () => {
-            const response = await request(app).post('/auth/logout').send({
+            const response = await request(app).post('/api/auth/logout').send({
                 refreshToken: validRefreshToken
             });
             expect(response.status).toBe(200);
         });
 
         test('should fail with 400 if refresh token is missing', async () => {
-            const response = await request(app).post('/auth/logout').send({});
+            const response = await request(app).post('/api/auth/logout').send({});
             expect(response.status).toBe(400);
         });
 
         test('should fail with 403 if refresh token is already logged out', async () => {
             // First logout
-            await request(app).post('/auth/logout').send({
+            await request(app).post('/api/auth/logout').send({
                 refreshToken: validRefreshToken
             });
 
             // Try to logout again
-            const response = await request(app).post('/auth/logout').send({
+            const response = await request(app).post('/api/auth/logout').send({
                 refreshToken: validRefreshToken
             });
             expect(response.status).toBe(403);
