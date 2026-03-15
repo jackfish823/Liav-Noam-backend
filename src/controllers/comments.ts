@@ -220,7 +220,7 @@ const voteComment = async (req: AuthRequest, res: Response) => {
         await Comment.findByIdAndUpdate(
             commentId,
             { $inc: { upCount: upDelta, downCount: downDelta } },
-            { session }
+            { session, timestamps: false }
         );
 
         await commitTransactionSafely(session);
@@ -260,7 +260,7 @@ const removeCommentVote = async (req: AuthRequest, res: Response) => {
             ? { $inc: { upCount: -1 } }
             : { $inc: { downCount: -1 } };
 
-        await Comment.findByIdAndUpdate(commentId, update, { session });
+        await Comment.findByIdAndUpdate(commentId, update, { session, timestamps: false });
 
         await commitTransactionSafely(session);
 
