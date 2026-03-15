@@ -6,6 +6,7 @@ import User from '../models/User';
 import Image from '../models/Image';
 import {createAuthTokens} from '../utils/jwt';
 import { abortTransactionSafely, commitTransactionSafely, startTransactionSafely } from '../utils/transaction';
+import {MONGO_ERROR_CODES} from "../constants/mongo";
 
 const attachProfileImageUrl = (user: any) => {
     const baseUrl = process.env.BASE_URL || '/api';
@@ -76,7 +77,13 @@ const createUser = async (req: Request, res: Response) => {
             });
         }
 
-        res.status(409).json({message: error.message});
+        if (error.code === MONGO_ERROR_CODES.DUPLICATE_KEY) {
+            const field = Object.keys(error.keyPattern)[0];
+
+            res.status(409).json({message: `A user with this ${field} already exists`});
+        } else {
+            res.status(500).json({message: 'An error occurred while creating the user'});
+        }
     } finally {
         session.endSession();
     }

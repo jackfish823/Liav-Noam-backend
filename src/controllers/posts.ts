@@ -201,7 +201,7 @@ const likePost = async (req: AuthRequest, res: Response) => {
         }
 
         await Like.create([{ postId, userId }], { session });
-        await Post.findByIdAndUpdate(postId, { $inc: { likeCount: 1 } }, { session });
+        await Post.findByIdAndUpdate(postId, { $inc: { likeCount: 1 } }, { session, timestamps: false });
 
         await commitTransactionSafely(session);
 
@@ -242,7 +242,7 @@ const unlikePost = async (req: AuthRequest, res: Response) => {
             return;
         }
 
-        await Post.findByIdAndUpdate(postId, { $inc: { likeCount: -1 } }, { session });
+        await Post.findByIdAndUpdate(postId, { $inc: { likeCount: -1 } }, { session, timestamps: false });
 
         await commitTransactionSafely(session);
 
