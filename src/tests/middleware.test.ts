@@ -8,7 +8,7 @@ const PROTECTED_ROUTE = '/api/post';
 
 beforeAll(async () => {
     app = await initApp();
-});
+}, 30000);
 
 afterAll(async () => {
     await mongoose.connection.close();

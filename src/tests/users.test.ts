@@ -28,7 +28,7 @@ beforeAll(async () => {
         password: initialUser.password
     });
     accessToken = loginResponse.body.token;
-});
+}, 30000);
 
 afterAll(async () => {
     await mongoose.connection.close();

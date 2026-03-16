@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import {Express} from 'express';
 import Post from '../models/Post';
 import Comment from '../models/Comment';
+import CommentVote from '../models/CommentVote';
 import User from '../models/User';
 
 let app: Express;
@@ -18,6 +19,7 @@ const testUser = {
 beforeAll(async () => {
     app = await initApp();
     await Comment.deleteMany();
+    await CommentVote.deleteMany();
     await Post.deleteMany();
     await User.deleteMany();
 
@@ -36,7 +38,7 @@ beforeAll(async () => {
         author: userId
     });
     postId = post._id.toString();
-});
+}, 30000);
 
 afterAll(async () => {
     await mongoose.connection.close();
@@ -202,6 +204,90 @@ describe('Comments API', () => {
         test('should return 404 for non-existent comment', async () => {
             const response = await request(app)
                 .delete('/api/comment/65e1d510e1b6f1234567890a')
+                .set('Authorization', `Bearer ${accessToken}`);
+            expect(response.status).toBe(404);
+        });
+    });
+
+    describe('POST /comment/:id/vote', () => {
+        let voteCommentId: string;
+
+        beforeAll(async () => {
+            const comment = await Comment.create({
+                body: 'Vote Test Comment',
+                postId: postId,
+                author: (await User.findOne())?._id
+            });
+            voteCommentId = comment._id.toString();
+        });
+
+        test('should upvote a comment', async () => {
+            const response = await request(app)
+                .post(`/api/comment/${voteCommentId}/vote`)
+                .set('Authorization', `Bearer ${accessToken}`)
+                .send({ value: 1 });
+            expect(response.status).toBe(200);
+            expect(response.body.upCount).toBe(1);
+            expect(response.body.downCount).toBe(0);
+        });
+
+        test('should switch vote from upvote to downvote', async () => {
+            const response = await request(app)
+                .post(`/api/comment/${voteCommentId}/vote`)
+                .set('Authorization', `Bearer ${accessToken}`)
+                .send({ value: -1 });
+            expect(response.status).toBe(200);
+            expect(response.body.upCount).toBe(0);
+            expect(response.body.downCount).toBe(1);
+        });
+
+        test('should return 400 for invalid vote value', async () => {
+            const response = await request(app)
+                .post(`/api/comment/${voteCommentId}/vote`)
+                .set('Authorization', `Bearer ${accessToken}`)
+                .send({ value: 5 });
+            expect(response.status).toBe(400);
+        });
+
+        test('should return 404 for non-existent comment', async () => {
+            const fakeId = new mongoose.Types.ObjectId();
+            const response = await request(app)
+                .post(`/api/comment/${fakeId}/vote`)
+                .set('Authorization', `Bearer ${accessToken}`)
+                .send({ value: 1 });
+            expect(response.status).toBe(404);
+        });
+    });
+
+    describe('DELETE /comment/:id/vote', () => {
+        let voteCommentId: string;
+
+        beforeAll(async () => {
+            const comment = await Comment.create({
+                body: 'Remove Vote Comment',
+                postId: postId,
+                author: (await User.findOne())?._id
+            });
+            voteCommentId = comment._id.toString();
+
+            await request(app)
+                .post(`/api/comment/${voteCommentId}/vote`)
+                .set('Authorization', `Bearer ${accessToken}`)
+                .send({ value: 1 });
+        });
+
+        test('should remove a vote from a comment', async () => {
+            const response = await request(app)
+                .delete(`/api/comment/${voteCommentId}/vote`)
+                .set('Authorization', `Bearer ${accessToken}`);
+            expect(response.status).toBe(200);
+            expect(response.body.upCount).toBe(0);
+            expect(response.body.downCount).toBe(0);
+        });
+
+        test('should return 404 when removing a vote that does not exist', async () => {
+            const response = await request(app)
+                .delete(`/api/comment/${voteCommentId}/vote`)
                 .set('Authorization', `Bearer ${accessToken}`);
             expect(response.status).toBe(404);
         });

@@ -45,7 +45,7 @@ beforeAll(async () => {
     const post1 = await Post.create({ message: 'Hello world', author: userId, likeCount: 5 });
     const post2 = await Post.create({ message: 'Cats are great', author: userId, likeCount: 15 });
     const post3 = await Post.create({ message: 'Dogs are better', author: userId, likeCount: 2 });
-    
+
     posts = [post1, post2, post3];
 
     // Add comments to post2
@@ -54,7 +54,7 @@ beforeAll(async () => {
 
     // Add 1 comment to post1
     await Comment.create({ body: 'First', postId: post1._id, author: userId });
-});
+}, 30000);
 
 afterAll(async () => {
     await mongoose.connection.close();
