@@ -7,7 +7,7 @@ let app: Express;
 
 beforeAll(async () => {
     app = await initApp();
-});
+}, 30000);
 
 afterAll(async () => {
     await mongoose.connection.close();

@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import {Express} from 'express';
 import User from '../models/User';
 import Post from '../models/Post';
+import Like from '../models/Like';
 
 let app: Express;
 let userId: string;
@@ -20,6 +21,7 @@ beforeAll(async () => {
     app = await initApp();
     await User.deleteMany();
     await Post.deleteMany();
+    await Like.deleteMany();
 
     // Register user
     const userResponse = await request(app).post('/api/user').send(testUser);
@@ -32,7 +34,7 @@ beforeAll(async () => {
         password: testUser.password
     });
     accessToken = loginResponse.body.token;
-});
+}, 30000);
 
 afterAll(async () => {
     await mongoose.connection.close();
@@ -155,5 +157,69 @@ describe('Posts API', () => {
         const response = await request(app).get(`/api/post/${postId}`)
             .set('Authorization', 'Bearer ' + accessToken);
         expect(response.status).toBe(404);
+    });
+
+    describe('POST /post/:id/like', () => {
+        let likePostId: string;
+
+        beforeAll(async () => {
+            const res = await request(app).post('/api/post')
+                .set('Authorization', 'Bearer ' + accessToken)
+                .send({ message: 'Like Test Post' });
+            likePostId = res.body._id;
+        });
+
+        test('should like a post', async () => {
+            const response = await request(app)
+                .post(`/api/post/${likePostId}/like`)
+                .set('Authorization', 'Bearer ' + accessToken);
+            expect(response.status).toBe(201);
+            expect(response.body.likeCount).toBe(1);
+        });
+
+        test('should return 409 when liking a post already liked', async () => {
+            const response = await request(app)
+                .post(`/api/post/${likePostId}/like`)
+                .set('Authorization', 'Bearer ' + accessToken);
+            expect(response.status).toBe(409);
+        });
+
+        test('should return 404 when liking a non-existent post', async () => {
+            const fakeId = new mongoose.Types.ObjectId();
+            const response = await request(app)
+                .post(`/api/post/${fakeId}/like`)
+                .set('Authorization', 'Bearer ' + accessToken);
+            expect(response.status).toBe(404);
+        });
+    });
+
+    describe('DELETE /post/:id/like', () => {
+        let likePostId: string;
+
+        beforeAll(async () => {
+            const res = await request(app).post('/api/post')
+                .set('Authorization', 'Bearer ' + accessToken)
+                .send({ message: 'Unlike Test Post' });
+            likePostId = res.body._id;
+
+            await request(app)
+                .post(`/api/post/${likePostId}/like`)
+                .set('Authorization', 'Bearer ' + accessToken);
+        });
+
+        test('should unlike a post', async () => {
+            const response = await request(app)
+                .delete(`/api/post/${likePostId}/like`)
+                .set('Authorization', 'Bearer ' + accessToken);
+            expect(response.status).toBe(200);
+            expect(response.body.likeCount).toBe(0);
+        });
+
+        test('should return 404 when unliking a post not liked', async () => {
+            const response = await request(app)
+                .delete(`/api/post/${likePostId}/like`)
+                .set('Authorization', 'Bearer ' + accessToken);
+            expect(response.status).toBe(404);
+        });
     });
 });

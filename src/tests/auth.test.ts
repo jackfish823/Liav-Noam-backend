@@ -21,7 +21,7 @@ beforeAll(async () => {
     const response = await request(app).post('/api/user').send(testUser);
 
     userId = response.body._id;
-});
+}, 30000);
 
 afterAll(async () => {
     await mongoose.connection.close();
@@ -159,6 +159,85 @@ describe('Auth API', () => {
                 refreshToken: validRefreshToken
             });
             expect(response.status).toBe(403);
+        });
+    });
+
+    describe('POST /auth/google', () => {
+        const originalFetch = global.fetch;
+
+        afterEach(() => {
+            global.fetch = originalFetch;
+        });
+
+        test('should fail with 400 if credential is missing', async () => {
+            const response = await request(app).post('/api/auth/google').send({});
+            expect(response.status).toBe(400);
+        });
+
+        test('should fail with 401 if Google credential is invalid', async () => {
+            global.fetch = jest.fn().mockResolvedValue({
+                ok: false,
+                status: 401
+            });
+
+            const response = await request(app).post('/api/auth/google').send({
+                credential: 'invalid_token'
+            });
+            expect(response.status).toBe(401);
+        });
+
+        test('should fail with 403 if Google email is not verified', async () => {
+            global.fetch = jest.fn().mockResolvedValue({
+                ok: true,
+                json: async () => ({
+                    email: 'unverified@gmail.com',
+                    email_verified: false,
+                    name: 'Unverified User'
+                })
+            });
+
+            const response = await request(app).post('/api/auth/google').send({
+                credential: 'some_token'
+            });
+            expect(response.status).toBe(403);
+        });
+
+        test('should login existing user via Google', async () => {
+            global.fetch = jest.fn().mockResolvedValue({
+                ok: true,
+                json: async () => ({
+                    email: testUser.email,
+                    email_verified: true,
+                    name: 'Auth Test'
+                })
+            });
+
+            const response = await request(app).post('/api/auth/google').send({
+                credential: 'valid_google_token'
+            });
+            expect(response.status).toBe(200);
+            expect(response.body.token).toBeDefined();
+            expect(response.body.refreshToken).toBeDefined();
+            expect(response.body._id).toBe(userId);
+        });
+
+        test('should create new user via Google if not exists', async () => {
+            global.fetch = jest.fn().mockResolvedValue({
+                ok: true,
+                json: async () => ({
+                    email: 'newgoogle@gmail.com',
+                    email_verified: true,
+                    name: 'New Google User'
+                })
+            });
+
+            const response = await request(app).post('/api/auth/google').send({
+                credential: 'valid_google_token'
+            });
+            expect(response.status).toBe(200);
+            expect(response.body.token).toBeDefined();
+            expect(response.body.refreshToken).toBeDefined();
+            expect(response.body._id).toBeDefined();
         });
     });
 });
